@@ -1,27 +1,27 @@
-import { DiscordAPIGuild, DiscordAPIGuildMember, DiscordAPIUser, Routes } from "@fawkes.js/api-types";
-import { Client } from "../Client";
-import { GuildMemberRoleHub } from "../hubs/GuildMemberRoleHub";
-import { Guild } from "./Guild";
-import { Role } from "./Role";
-import { User } from "./User";
+import { type DiscordAPIGuild, type DiscordAPIGuildMember, Routes, type DiscordAPIUser } from '@fawkes.js/api-types'
+import { type Client } from '../Client'
+import { GuildMemberRoleHub } from '../hubs/GuildMemberRoleHub'
+import { Guild } from './Guild'
+import { User } from './User'
+import { type Role } from './Role'
 
 export class GuildMember {
   user: User
-  roles: GuildMemberRoleHub;
-  client!: Client;
-  guild: Guild;
-  constructor(client: Client, guild: DiscordAPIGuild, member: DiscordAPIGuildMember) {
-    Object.defineProperty(this, 'client', { value: client });
+  roles: GuildMemberRoleHub
+  client!: Client
+  guild: Guild
+  constructor (client: Client, guild: DiscordAPIGuild, member: DiscordAPIGuildMember) {
+    Object.defineProperty(this, 'client', { value: client })
 
     this.guild = new Guild(client, guild)
 
     this.user = new User(<DiscordAPIUser>member.user)
 
-    this.roles = new GuildMemberRoleHub(client, guild, member);
+    this.roles = new GuildMemberRoleHub(client, guild, member)
   }
 
-  async ban() {
-    this.client.rest.request(Routes.createGuildBan(this.guild.id, this.user.id))
+  async ban (): Promise<void> {
+    await this.client.rest.request(Routes.createGuildBan(this.guild.id, this.user.id))
 
     const cachedGuild = await this.client.cache.get('guild:' + this.guild.id)
 
@@ -32,21 +32,20 @@ export class GuildMember {
     await this.client.cache.set('guild:' + this.guild.id, cachedGuild)
   }
 
-  kick() { }
+  kick (): void { }
 
-  async bannable() {
-    if (!this.manageable()) return false;
+  async bannable (): Promise<any> {
+    if (!this.manageable()) return false
 
-    if (await this.roles.highest() === null && (<Role>await (await this.guild.members.me())?.roles.highest()).position !== null) return true;
-    else if (await this.roles.highest() === null && (<Role>await (await this.guild.members.me())?.roles.highest()).position === null) return false;
-    else if ((<Role>await this.roles.highest()).position < (<Role>await (await this.guild.members.me())?.roles.highest()).position) return true;
-    else return false;
-
+    if (await this.roles.highest() === null && (<Role> await (await this.guild.members.me())?.roles.highest()).position !== null) return true
+    else if (await this.roles.highest() === null && (<Role> await (await this.guild.members.me())?.roles.highest()).position === null) return false
+    else if ((<Role> await this.roles.highest()).position < (<Role> await (await this.guild.members.me())?.roles.highest()).position) return true
+    else return false
   }
 
-  manageable() {
-    if (this.user.id === this.guild.owner?.id) return false;
-    if (this.user.id === this.client.application.client.id) return false;
-    else return true;
+  manageable (): boolean {
+    if (this.user.id === this.guild.owner?.id) return false
+    if (this.user.id === this.client.application?.client.id) return false
+    else return true
   }
 }

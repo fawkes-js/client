@@ -1,155 +1,140 @@
-import { DiscordAPIButtonComponentButtonStyleType, DiscordAPIEmoji, DiscordAPIGuild, DiscordAPIGuildMember, DiscordAPIInteraction, DiscordAPIMessageComponentType, DiscordAPIUser, Routes } from "@fawkes.js/api-types";
-import { DiscordAPILocale } from "@fawkes.js/api-types";
-import { DiscordAPICommandOptionType } from "@fawkes.js/api-types";
-import { Client } from "../Client";
-import { Guild } from "./Guild";
-import { GuildMember } from "./GuildMember";
-import { User } from "./User";
-import { Message } from './Message';
-import { APIEmbed } from "./APIEmbed";
-import { Embed } from './APIEmbed'
-import { BaseInteraction } from "./BaseInteraction";
+import { type DiscordAPIGuild, type DiscordAPIButtonComponentButtonStyleType, type DiscordAPIEmoji, type DiscordAPIMessageComponentType, Routes, DiscordAPICommandOptionType, type DiscordAPIInteraction } from '@fawkes.js/api-types'
+import { type Client } from '../Client'
+import { User } from './User'
+import { Message } from './Message'
+import { APIEmbed, type Embed } from './APIEmbed'
+import { BaseInteraction } from './BaseInteraction'
 
-type InteractionData = {
-  interaction: DiscordAPIInteraction;
-  guild: DiscordAPIGuild;
-  member: DiscordAPIGuildMember | null;
-  user: DiscordAPIUser | null;
-};
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface Attachment {}
 
-type Attachment = {}
-
-type ButtonComponent = {
-  type: 2;
-  style: DiscordAPIButtonComponentButtonStyleType;
-  label?: string;
-  emoji?: DiscordAPIEmoji;
-  custom_id?: string;
-  url?: string;
-  disabled?: boolean;
+interface ButtonComponent {
+  type: 2
+  style: DiscordAPIButtonComponentButtonStyleType
+  label?: string
+  emoji?: DiscordAPIEmoji
+  custom_id?: string
+  url?: string
+  disabled?: boolean
 }
 
-type StringSelectComponentOption = {
-  label: string;
-  value: string;
-  description?: string;
-  emoji?: DiscordAPIEmoji;
+interface StringSelectComponentOption {
+  label: string
+  value: string
+  description?: string
+  emoji?: DiscordAPIEmoji
 }
-type StringSelectComponent = {
-  type: DiscordAPIMessageComponentType.StringSelect;
-  custom_id: string;
+interface StringSelectComponent {
+  type: DiscordAPIMessageComponentType.StringSelect
+  custom_id: string
   options: StringSelectComponentOption[]
 }
 
-type TextInputComponent = {
+interface TextInputComponent {
   type: DiscordAPIMessageComponentType.TextInput
 }
 
-type UserSelectComponent = {
+interface UserSelectComponent {
   type: DiscordAPIMessageComponentType.UserSelect
 }
 
-type RoleSelectComponent = {
+interface RoleSelectComponent {
   type: DiscordAPIMessageComponentType.RoleSelect
 }
 
-type MentionableSelectComponent = {
+interface MentionableSelectComponent {
   type: DiscordAPIMessageComponentType.MentionableSelect
 }
 
-type ChannelSelectComponent = {
+interface ChannelSelectComponent {
   type: DiscordAPIMessageComponentType.ChannelSelect
 }
 
-type ActionRowComponent = {
-  type: DiscordAPIMessageComponentType.ActionRow;
-  components: (ButtonComponent | StringSelectComponent | TextInputComponent | UserSelectComponent | RoleSelectComponent | MentionableSelectComponent | ChannelSelectComponent)[];
+interface ActionRowComponent {
+  type: DiscordAPIMessageComponentType.ActionRow
+  components: Array<ButtonComponent | StringSelectComponent | TextInputComponent | UserSelectComponent | RoleSelectComponent | MentionableSelectComponent | ChannelSelectComponent>
 }
 
-type InteractionResponseOptions = {
-  content?: string;
-  embeds?: Embed[];
-  attachments?: Attachment[];
-  fetchReply?: boolean;
+interface InteractionResponseOptions {
+  content?: string
+  embeds?: Embed[]
+  attachments?: Attachment[]
+  fetchReply?: boolean
   components?: ActionRowComponent[]
-};
+}
 
 export class ChatInputCommandInteraction extends BaseInteraction {
-  command: string;
-  options: any[];
-  constructor(client: Client, data: InteractionData) {
-    super(client, data)
-    let options: any[] = [];
+  command: string
+  options: any[]
+  constructor (client: Client, interaction: DiscordAPIInteraction,guild:DiscordAPIGuild) {
+    super(client, interaction,guild)
+    const options: any[] = []
 
-    if (data.interaction.data?.options) {
-      data.interaction.data?.options.map((option) => {
+    if ((interaction.data?.options) != null) {
+      interaction.data?.options.forEach( async (option) => {
         switch (option.type) {
           case DiscordAPICommandOptionType.SubCommand:
-            break;
+            break
           case DiscordAPICommandOptionType.SubCommandGroup:
-            break;
+            break
           case DiscordAPICommandOptionType.String:
             options.push({ name: option.name, data: option.value, type: option.type })
-            break;
+            break
           case DiscordAPICommandOptionType.Integer:
-            break;
+            break
           case DiscordAPICommandOptionType.Boolean:
-            break;
+            break
           case DiscordAPICommandOptionType.User:
-            const member = data.guild.members.find((m) => m.user?.id === option.value)
+            const member = guild.members.find((m) => m.user?.id === option.value)
+
             member?.user ? options.push({ name: option.name, data: new User(member.user), type: option.type }) : null
-            break;
+            break
           case DiscordAPICommandOptionType.Channel:
-            break;
+            break
           case DiscordAPICommandOptionType.Role:
-            break;
+            break
           case DiscordAPICommandOptionType.Mentionable:
-            break;
+            break
           case DiscordAPICommandOptionType.Number:
-            break;
+            break
           case DiscordAPICommandOptionType.Attachment:
-            break;
+            break
         }
       })
     }
 
-    this.command = <string>data.interaction.data?.name;
+    this.command = <string>interaction.data?.name
 
-    this.options = data.interaction.data?.options ? options : []
-
+    this.options = ((interaction.data?.options) != null) ? options : []
   }
 
-  reply(data: InteractionResponseOptions) {
-
-    function APIEmbeds(embeds: Embed[]) {
+  async reply (data: InteractionResponseOptions): Promise<any> {
+    function APIEmbeds (embeds: Embed[]): APIEmbed[] {
       const APIEmbeds: APIEmbed[] = []
       embeds.map((embed) => APIEmbeds.push(new APIEmbed(embed)))
       return APIEmbeds
     }
 
     const APIData: any = { ...data }
-    APIData.embeds = data.embeds ? APIEmbeds(data.embeds) : []
+    APIData.embeds = (data.embeds != null) ? APIEmbeds(data.embeds) : []
 
-    console.log(APIData)
-    const reply = this.client.rest.request(Routes.createInteractionResponse(this.id, this.token), { type: 4, data: APIData });
+    await this.client.rest.request(Routes.createInteractionResponse(this.id, this.token), { type: 4, data: APIData })
 
-    const fetchReply = async () => {
-      return new Message(this.client, await this.client.rest.request(Routes.getOriginalInteractionResponse(this.client.application.id, this.token)))
+    const fetchReply = async (): Promise<Message> => {
+      return new Message(this.client, await this.client.rest.request(Routes.getOriginalInteractionResponse(this.client?.application?.id, this.token)))
     }
-    if (data.fetchReply) return fetchReply()
-    else return null;
+    if (data.fetchReply === true) return await fetchReply()
+    else return null
   }
 
-  getUser() {
-    let users: any[] = [];
+  getUser (): User[] {
+    const users: any[] = []
 
-    this.options.map((option) => {
-      if (option.type === DiscordAPICommandOptionType.User) users.push(option)
+    this.options.forEach((option): void => {
+      if (option.type === DiscordAPICommandOptionType.User) users.push(option.data)
     })
-    return users;
+    return users
   }
 
-  getOption(name: string) { }
-
-
+  getOption (name: string): void { }
 }
