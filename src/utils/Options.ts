@@ -1,18 +1,18 @@
-export function mergeOptions(options: object[]) {
-  let value = {};
+export function mergeOptions (options: object[]): any {
+  let value = {}
 
-  options.map((option) => {
-    value = { ...value, ...option };
-  });
+  options.forEach((option) => {
+    value = { ...value, ...option }
+  })
 
-  return value;
+  return value
 }
 
 export const defaultRESTOptions = {
-  prefix: "Bot",
-  api: "https://discord.com/api",
+  prefix: 'Bot',
+  api: 'https://discord.com/api',
   versioned: true,
-  version: 10,
-};
+  version: 10
+}
 
-export const defaultClientOptions = {};
+export const defaultClientOptions = {}

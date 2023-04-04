@@ -1,53 +1,54 @@
-import { DiscordAPIGuild } from "@fawkes.js/api-types/";
-import { createClient, RedisClientType } from "redis";
-import { Client } from "../Client.js";
-import { REDISOptions } from '@fawkes.js/api-types'
+import { type DiscordAPIGuild, type REDISOptions } from '@fawkes.js/api-types/'
+import { createClient, type RedisClientType } from 'redis'
+import { type Client } from '../Client.js'
 
 export class RedisClient {
-  client: Client;
-  options: REDISOptions;
-  cache!: RedisClientType;
-  constructor(Client: Client) {
-    this.options = Client.options.redis;
+  client: Client
+  options: REDISOptions
+  cache!: RedisClientType
+  constructor (Client: Client) {
+    this.options = Client.options.redis
 
-    this.client = Client;
+    this.client = Client
 
-    Object.defineProperty(this, "cache", { value: null, writable: true });
-    Object.defineProperty(this, "subscriber", { value: null, writable: true });
+    Object.defineProperty(this, 'cache', { value: null, writable: true })
+    Object.defineProperty(this, 'subscriber', { value: null, writable: true })
   }
 
-  async connect() {
-    const url = this.options.url
+  async connect (): Promise<void> {
+    const url = ((<string> this.options.url).length > 0)
       ? this.options.url
-      : `redis://${this.options.username}:${this.options.password}@${this.options.hostname}:${this.options.port}`;
+      : `redis://${<string> this.options.username}:${<string> this.options.password}@${<string> this.options.hostname}:${<string> this.options.port}`
 
-    this.cache = createClient({ url });
+    this.cache = createClient({ url })
 
-    await this.cache.connect();
+    await this.cache.connect()
   }
 
-
-
-  async get(id: string) {
-    return JSON.parse(<string>await this.cache.get(id));
-  }
-  async set(id: string, data: any) {
-    return await this.cache.set(id, JSON.stringify(data));
+  async get (id: string): Promise<any> {
+    const data = await this.cache.get(id)
+    if (data === null) return null
+    else return JSON.parse(data)
   }
 
-  async delete(id: string) {
-    const key = `guild:${id}`;
-    return await this.cache.del(key);
+  async set (id: string, data: any): Promise<any> {
+    return await this.cache.set(id, JSON.stringify(data))
   }
 
-  async has(id: string) {
-    const key = `guild:${id}`;
-    return (await this.cache.get(key)) ? true : false;
+  async delete (id: string): Promise<any> {
+    const key = `guild:${id}`
+    return await this.cache.del(key)
   }
 
-  async patch(id: string, data: DiscordAPIGuild) {
-    const key = `guild:${id}`;
+  async has (id: string): Promise<any> {
+    const key = `guild:${id}`
+    if (await this.cache.get(key) !== null) return true
+    else return false
+  }
 
-    return await this.cache.set(key, JSON.stringify(data));
+  async patch (id: string, data: DiscordAPIGuild): Promise<any> {
+    const key = `guild:${id}`
+
+    return await this.cache.set(key, JSON.stringify(data))
   }
 }

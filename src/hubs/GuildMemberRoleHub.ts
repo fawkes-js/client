@@ -1,80 +1,79 @@
-import { DiscordAPIGuild, DiscordAPIGuildMember, DiscordAPIRole, Routes } from "@fawkes.js/api-types";
-import { Client } from "../Client";
-import { Role } from "../structures/Role";
-import { addRole, removeRole } from "../utils/Role";
+import { type DiscordAPIGuild, type DiscordAPIGuildMember, type DiscordAPIRole, Routes } from '@fawkes.js/api-types'
+import { type Client } from '../Client'
+import { Role } from '../structures/Role'
+import { addRole, removeRole } from '../utils/Role'
 
 export class GuildMemberRoleHub {
-  guild: DiscordAPIGuild;
-  member: DiscordAPIGuildMember;
-  client!: Client;
-  constructor(client: Client, guild: DiscordAPIGuild, member: DiscordAPIGuildMember) {
-    Object.defineProperty(this, 'client', { value: client });
+  guild: DiscordAPIGuild
+  member: DiscordAPIGuildMember
+  client!: Client
+  constructor (client: Client, guild: DiscordAPIGuild, member: DiscordAPIGuildMember) {
+    Object.defineProperty(this, 'client', { value: client })
 
+    this.guild = guild
 
-    this.guild = guild;
-
-    this.member = member;
+    this.member = member
   }
 
-  async get(roleId?: string) {
+  async get (roleId?: string): Promise<Role[] | null> {
     const memberRoles = (await this.client.cache.get('guild:' + this.guild.id)).members.find((member: DiscordAPIGuildMember) => member.user?.id === this.member.user?.id).roles
 
-    if (roleId) {
-      const role = this.guild.roles.find((role) => role.id === roleId);
+    if (roleId != null) {
+      const role = this.guild.roles.find((role) => role.id === roleId)
 
-      if (!role) return null;
-      if (!memberRoles.includes(role.id)) return;
-      else return new Role(role);
+      if (role == null) return null
+      if (memberRoles.includes(role.id) === false) return null
+      else return [new Role(role)]
     } else {
-      const roles: Role[] = [];
+      const roles: Role[] = []
 
-      this.guild.roles.map((role) => {
-        if (!memberRoles.includes(role.id)) return;
+      this.guild.roles.forEach((role): null | undefined => {
+        if (memberRoles.includes(role.id) === null) return null
 
         roles.push(new Role(role))
-      });
-      return roles;
+      })
+      return roles
     }
   }
 
-  async add(roleId: string) {
-    const role = this.guild.roles.find((role) => role.id === roleId);
-    if (!role) {
+  async add (roleId: string): Promise<Role | null> {
+    const role = this.guild.roles.find((role) => role.id === roleId)
+    if (role == null) {
       // Throw an error!
-      console.log("invalid role id");
-      return;
+      console.log('invalid role id')
+      return null
     }
-    await this.client.rest.request(Routes.addMemberRole(this.guild.id, <string>this.member.user?.id, roleId));
+    await this.client.rest.request(Routes.addMemberRole(this.guild.id, <string> this.member.user?.id, roleId))
 
-    addRole(this.client, this.guild.id, <string>this.member.user?.id, role)
-
-    return new Role(role);
-  }
-
-  async remove(roleId: string) {
-    const role = this.guild.roles.find((role) => role.id === roleId);
-    if (!role) {
-      // Throw an error!
-      console.log("invalid role id");
-      return;
-    }
-
-    const res = await this.client.rest.request(Routes.removeMemberRole(this.guild.id, <string>this.member.user?.id, roleId));
-
-    removeRole(this.client, this.guild.id, <string>this.member.user?.id, role)
+    await addRole(this.client, this.guild.id, <string> this.member.user?.id, role)
 
     return new Role(role)
   }
 
-  async highest() {
+  async remove (roleId: string): Promise<Role | null> {
+    const role = this.guild.roles.find((role) => role.id === roleId)
+    if (role == null) {
+      // Throw an error!
+      console.log('invalid role id')
+      return null
+    }
+
+    await this.client.rest.request(Routes.removeMemberRole(this.guild.id, <string> this.member.user?.id, roleId))
+
+    await removeRole(this.client, this.guild.id, <string> this.member.user?.id, role)
+
+    return new Role(role)
+  }
+
+  async highest (): Promise<Role | null> {
     let highest: DiscordAPIRole | null = null;
 
-    (<Role[]>await this.get())!.map((role) => {
+    (await this.get())?.forEach((role): any => {
       const guildRole = this.guild.roles.find((guildRole) => guildRole.id === role.id)
-      if (!guildRole) return;
-      if (highest === null || guildRole.position > highest!.position) highest = guildRole
+      if (guildRole == null) return
+      if (highest === null || guildRole.position > highest.position) highest = guildRole
     })
-    if (!highest) return null;
+    if (highest === null) return null
 
     return new Role(highest)
   }
