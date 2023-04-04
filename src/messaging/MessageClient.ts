@@ -34,7 +34,6 @@ export class MessageClient {
 
         // Primary Functions:
         this.channel.consume('primary', (message) => {
-          console.log('consumed')
           const packet = JSON.parse(message.content.toString())
 
           this.client.emit(packet.t, packet.d)

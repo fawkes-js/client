@@ -11,7 +11,6 @@ export class READY {
   initialize (): void {
     this.client.on('READY', (packet) => {
       void (async (packet) => {
-        console.log('ready!')
         const application = await this.client.rest.request(Routes.application())
         await this.client.cache.set('application', application)
         await this.client.cache.set('ready', packet)
