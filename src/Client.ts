@@ -3,9 +3,14 @@ import { RedisClient } from './messaging/RedisClient';
 import { handlers } from './messaging/handlers/index';
 import { REST, type RESTOptions } from '@fawkes.js/rest';
 import { GuildHub } from './hubs/GuildHub';
-import { type Application } from './structures/Application';
+import { Application } from './structures/Application';
 import { defaultRESTOptions, mergeOptions } from './utils/Options';
-import { type RabbitOptions, type REDISOptions } from '@fawkes.js/api-types';
+import {
+  Routes,
+  type RabbitOptions,
+  type REDISOptions,
+  DiscordAPIApplication,
+} from '@fawkes.js/api-types';
 import { MessageClient } from './messaging/MessageClient';
 
 interface RESTClientOptions {
@@ -39,7 +44,7 @@ export class Client extends EventEmitter {
         mergeOptions([
           defaultRESTOptions,
           <object>options.rest,
-          { token: options.token },
+          { discord: { token: options.token } },
           { redis: options.redis },
         ])
       )
@@ -66,6 +71,15 @@ export class Client extends EventEmitter {
     });
 
     const ready = await this.cache.get('ready');
-    if (ready !== null) this.emit('READY', ready);
+    if (ready !== null) {
+      const application = await this.rest.request(Routes.application());
+      this.application = new Application(
+        this,
+        <DiscordAPIApplication>application
+      );
+      this.emit('ready', ready);
+    } else {
+      this.on('readyGateway', (ready) => this.emit('ready', ready));
+    }
   }
 }

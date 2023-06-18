@@ -21,7 +21,7 @@ export class READY {
           this.client,
           <DiscordAPIApplication>application
         );
-        this.client.emit('ready', packet);
+        this.client.emit('readyGateway', packet);
       })(packet);
     });
   }

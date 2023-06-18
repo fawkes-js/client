@@ -1,18 +1,35 @@
-export function mergeOptions (options: object[]): any {
-  let value = {}
+export function mergeOptions(options: object[]): any {
+  function nested(objectA: any, objectB: any) {
+    Object.keys(objectB).forEach((key) => {
+      if (Object.keys(objectA).includes(key)) {
+        if (typeof objectB[key] === 'object') {
+          nested(objectA[key], objectB[key]);
+        } else {
+          objectA[key] = objectB[key];
+        }
+      } else objectA[key] = objectB[key];
+    });
+
+    return objectA;
+  }
+
+  let value = {};
 
   options.forEach((option) => {
-    value = { ...value, ...option }
-  })
+    if (!option) return;
+    value = nested(value, option);
+  });
 
-  return value
+  return value;
 }
 
 export const defaultRESTOptions = {
-  prefix: 'Bot',
-  api: 'https://discord.com/api',
-  versioned: true,
-  version: 10
-}
+  discord: {
+    prefix: 'Bot',
+    api: 'https://discord.com/api',
+    versioned: true,
+    version: 10,
+  },
+};
 
-export const defaultClientOptions = {}
+export const defaultClientOptions = {};
