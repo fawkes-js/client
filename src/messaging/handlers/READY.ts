@@ -1,7 +1,6 @@
-import { Routes } from '@fawkes.js/api-types';
+import { Routes, type DiscordAPIApplication } from '@fawkes.js/api-types';
 import { type Client } from '../../Client';
 import { Application } from '../../structures/Application';
-import { DiscordAPIApplication } from '@fawkes.js/api-types';
 
 export class READY {
   client: Client;

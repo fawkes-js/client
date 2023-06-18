@@ -54,52 +54,52 @@ export interface Embed {
 }
 
 export class APIEmbed {
-  title: any
-  description: any
-  timestamp: any
-  color: any
-  footer: any
-  image: any
-  thumbnail: any
-  video: any
-  provider: any
-  author: APIEmbedAuthor | undefined
-  fields: any
+  title: any;
+  description: any;
+  timestamp: any;
+  color: any;
+  footer: any;
+  image: any;
+  thumbnail: any;
+  video: any;
+  provider: any;
+  author: APIEmbedAuthor | undefined;
+  fields: any;
 
   constructor (embed: Embed) {
-    this.title = embed.title
+    this.title = embed.title;
 
-    this.description = embed.description
+    this.description = embed.description;
 
-    this.timestamp = embed.timestamp
+    this.timestamp = embed.timestamp;
 
-    this.color = embed.color
+    this.color = embed.color;
 
-    this.footer = embed.footer
+    this.footer = embed.footer;
 
-    this.image = embed.image
+    this.image = embed.image;
 
-    this.thumbnail = embed.thumbnail
+    this.thumbnail = embed.thumbnail;
 
-    this.video = embed.video
+    this.video = embed.video;
 
-    this.provider = embed.provider
+    this.provider = embed.provider;
 
-    this.author = (embed.author != null) ? new APIEmbedAuthor(embed.author) : undefined
+    this.author = (embed.author != null) ? new APIEmbedAuthor(embed.author) : undefined;
 
-    this.fields = embed.fields
+    this.fields = embed.fields;
   }
 }
 
 export class APIEmbedAuthor {
-  name: string
-  url: string | undefined
-  icon_url: string | null
+  name: string;
+  url: string | undefined;
+  icon_url: string | null;
   constructor (author: EmbedAuthor) {
-    this.name = author.name
+    this.name = author.name;
 
-    this.url = author.url
+    this.url = author.url;
 
-    this.icon_url = author.iconURL
+    this.icon_url = author.iconURL;
   }
 }

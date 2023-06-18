@@ -6,7 +6,7 @@ import {
   Routes,
   DiscordAPICommandOptionType,
   type DiscordAPIInteraction,
-  DiscordAPIMessage,
+  type DiscordAPIMessage,
 } from '@fawkes.js/api-types';
 import { type Client } from '../Client';
 import { User } from './User';
@@ -92,6 +92,7 @@ export class ChatInputCommandInteraction extends BaseInteraction {
     const options: any[] = [];
 
     if (interaction.data?.options != null) {
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
       interaction.data?.options.forEach(async (option) => {
         switch (option.type) {
           case DiscordAPICommandOptionType.SubCommand:
@@ -110,17 +111,17 @@ export class ChatInputCommandInteraction extends BaseInteraction {
           case DiscordAPICommandOptionType.Boolean:
             break;
           case DiscordAPICommandOptionType.User:
+            // eslint-disable-next-line no-case-declarations
             const member = guild.members.find(
               (m) => m.user?.id === option.value
             );
 
-            member?.user
-              ? options.push({
-                  name: option.name,
-                  data: new User(member.user),
-                  type: option.type,
-                })
-              : null;
+            if (member?.user)
+              options.push({
+                name: option.name,
+                data: new User(member.user),
+                type: option.type,
+              });
             break;
           case DiscordAPICommandOptionType.Channel:
             break;

@@ -1,5 +1,5 @@
 export function mergeOptions(options: object[]): any {
-  function nested(objectA: any, objectB: any) {
+  function nested(objectA: any, objectB: any): any {
     Object.keys(objectB).forEach((key) => {
       if (Object.keys(objectA).includes(key)) {
         if (typeof objectB[key] === 'object') {

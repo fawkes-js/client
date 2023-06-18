@@ -9,7 +9,7 @@ import {
   Routes,
   type RabbitOptions,
   type REDISOptions,
-  DiscordAPIApplication,
+  type DiscordAPIApplication,
 } from '@fawkes.js/api-types';
 import { MessageClient } from './messaging/MessageClient';
 
@@ -73,10 +73,7 @@ export class Client extends EventEmitter {
     const ready = await this.cache.get('ready');
     if (ready !== null) {
       const application = await this.rest.request(Routes.application());
-      this.application = new Application(
-        this,
-        <DiscordAPIApplication>application
-      );
+      this.application = new Application(this, <DiscordAPIApplication>application);
       this.emit('ready', ready);
     } else {
       this.on('readyGateway', (ready) => this.emit('ready', ready));
