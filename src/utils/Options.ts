@@ -2,7 +2,7 @@ export function mergeOptions(options: object[]): any {
   function nested(objectA: any, objectB: any): any {
     Object.keys(objectB).forEach((key) => {
       if (Object.keys(objectA).includes(key)) {
-        if (typeof objectB[key] === 'object') {
+        if (typeof objectB[key] === "object") {
           nested(objectA[key], objectB[key]);
         } else {
           objectA[key] = objectB[key];
@@ -25,8 +25,8 @@ export function mergeOptions(options: object[]): any {
 
 export const defaultRESTOptions = {
   discord: {
-    prefix: 'Bot',
-    api: 'https://discord.com/api',
+    prefix: "Bot",
+    api: "https://discord.com/api",
     versioned: true,
     version: 10,
   },

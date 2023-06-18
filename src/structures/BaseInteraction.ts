@@ -4,11 +4,11 @@ import {
   type DiscordAPIInteraction,
   type DiscordAPIGuild,
   type DiscordAPIGuildMember,
-} from '@fawkes.js/api-types';
-import { type Client } from '../Client';
-import { Guild } from './Guild';
-import { GuildMember } from './GuildMember';
-import { User } from './User';
+} from "@fawkes.js/api-types";
+import { type Client } from "../Client";
+import { Guild } from "./Guild";
+import { GuildMember } from "./GuildMember";
+import { User } from "./User";
 
 export class BaseInteraction {
   guild: Guild;
@@ -19,30 +19,18 @@ export class BaseInteraction {
   token!: string;
   locale?: DiscordAPILocale | undefined;
   type: DiscordAPIInteractionType;
-  constructor(
-    client: Client,
-    interaction: DiscordAPIInteraction,
-    guild: DiscordAPIGuild
-  ) {
-    Object.defineProperty(this, 'client', { value: client });
+  constructor(client: Client, interaction: DiscordAPIInteraction, guild: DiscordAPIGuild) {
+    Object.defineProperty(this, "client", { value: client });
 
-    Object.defineProperty(this, 'token', { value: interaction.token });
+    Object.defineProperty(this, "token", { value: interaction.token });
 
     this.id = interaction.id;
 
     this.guild = new Guild(client, guild);
 
-    this.member =
-      interaction.member !== null
-        ? new GuildMember(
-            client,
-            guild,
-            <DiscordAPIGuildMember>interaction.member
-          )
-        : null;
+    this.member = interaction.member !== null ? new GuildMember(client, guild, <DiscordAPIGuildMember>interaction.member) : null;
 
-    this.user =
-      interaction.user !== undefined ? new User(interaction.user) : null;
+    this.user = interaction.user !== undefined ? new User(interaction.user) : null;
 
     this.locale = interaction.locale;
 

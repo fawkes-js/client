@@ -1,19 +1,14 @@
-import {
-  type DiscordAPIGuild,
-  type DiscordAPIGuildMember,
-  type DiscordAPIRole,
-  Routes,
-} from '@fawkes.js/api-types';
-import { type Client } from '../Client';
-import { Role } from '../structures/Role';
-import { addRole, removeRole } from '../utils/Role';
+import { type DiscordAPIGuild, type DiscordAPIGuildMember, type DiscordAPIRole, Routes } from "@fawkes.js/api-types";
+import { type Client } from "../Client";
+import { Role } from "../structures/Role";
+import { addRole, removeRole } from "../utils/Role";
 
 export class GuildMemberRoleHub {
   guild: DiscordAPIGuild;
   member: DiscordAPIGuildMember;
   client!: Client;
   constructor(client: Client, guild: DiscordAPIGuild, member: DiscordAPIGuildMember) {
-    Object.defineProperty(this, 'client', { value: client });
+    Object.defineProperty(this, "client", { value: client });
 
     this.guild = guild;
 
@@ -21,7 +16,7 @@ export class GuildMemberRoleHub {
   }
 
   async get(roleId?: string): Promise<Role[] | null> {
-    const memberRoles = (await this.client.cache.get('guild:' + this.guild.id)).members.find(
+    const memberRoles = (await this.client.cache.get("guild:" + this.guild.id)).members.find(
       (member: DiscordAPIGuildMember) => member.user?.id === this.member.user?.id
     ).roles;
 
@@ -47,12 +42,10 @@ export class GuildMemberRoleHub {
     const role = this.guild.roles.find((role) => role.id === roleId);
     if (role == null) {
       // Throw an error!
-      console.log('invalid role id');
+      console.log("invalid role id");
       return null;
     }
-    await this.client.rest.request(
-      Routes.addMemberRole(this.guild.id, <string>this.member.user?.id, roleId)
-    );
+    await this.client.rest.request(Routes.addMemberRole(this.guild.id, <string>this.member.user?.id, roleId));
 
     await addRole(this.client, this.guild.id, <string>this.member.user?.id, role);
 
@@ -63,13 +56,11 @@ export class GuildMemberRoleHub {
     const role = this.guild.roles.find((role) => role.id === roleId);
     if (role == null) {
       // Throw an error!
-      console.log('invalid role id');
+      console.log("invalid role id");
       return null;
     }
 
-    await this.client.rest.request(
-      Routes.removeMemberRole(this.guild.id, <string>this.member.user?.id, roleId)
-    );
+    await this.client.rest.request(Routes.removeMemberRole(this.guild.id, <string>this.member.user?.id, roleId));
 
     await removeRole(this.client, this.guild.id, <string>this.member.user?.id, role);
 

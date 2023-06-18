@@ -1,5 +1,5 @@
-import { Routes, type DiscordAPICommandOptionType } from '@fawkes.js/api-types';
-import { type Client } from '../Client';
+import { Routes, type DiscordAPICommandOptionType } from "@fawkes.js/api-types";
+import { type Client } from "../Client";
 
 interface CommandOption {
   name: string;
@@ -24,15 +24,12 @@ export class CommandHub {
       const ok = Object.keys;
       const tx = typeof x;
       const ty = typeof y;
-      return x && y && tx === 'object' && tx === ty
+      return x && y && tx === "object" && tx === ty
         ? ok(x).length === ok(y).length && ok(x).every((key) => deepEqual(x[key], y[key]))
         : x === y;
     }
     const createCommand = async (): Promise<void> => {
-      const command = await this.client.rest.request(
-        Routes.createApplicationCommand(this.client.application?.id),
-        options
-      );
+      const command = await this.client.rest.request(Routes.createApplicationCommand(this.client.application?.id), options);
       void this.client.cache.set(`command:${options.name}`, {
         id: command.id,
         options,

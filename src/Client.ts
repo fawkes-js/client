@@ -1,17 +1,12 @@
-import { EventEmitter } from 'node:events';
-import { RedisClient } from './messaging/RedisClient';
-import { handlers } from './messaging/handlers/index';
-import { REST, type RESTOptions } from '@fawkes.js/rest';
-import { GuildHub } from './hubs/GuildHub';
-import { Application } from './structures/Application';
-import { defaultRESTOptions, mergeOptions } from './utils/Options';
-import {
-  Routes,
-  type RabbitOptions,
-  type REDISOptions,
-  type DiscordAPIApplication,
-} from '@fawkes.js/api-types';
-import { MessageClient } from './messaging/MessageClient';
+import { EventEmitter } from "node:events";
+import { RedisClient } from "./messaging/RedisClient";
+import { handlers } from "./messaging/handlers/index";
+import { REST, type RESTOptions } from "@fawkes.js/rest";
+import { GuildHub } from "./hubs/GuildHub";
+import { Application } from "./structures/Application";
+import { defaultRESTOptions, mergeOptions } from "./utils/Options";
+import { Routes, type RabbitOptions, type REDISOptions, type DiscordAPIApplication } from "@fawkes.js/api-types";
+import { MessageClient } from "./messaging/MessageClient";
 
 interface RESTClientOptions {
   prefix?: string;
@@ -41,12 +36,7 @@ export class Client extends EventEmitter {
     this.cache = new RedisClient(this);
     this.rest = new REST(
       <RESTOptions>(
-        mergeOptions([
-          defaultRESTOptions,
-          <object>options.rest,
-          { discord: { token: options.token } },
-          { redis: options.redis },
-        ])
+        mergeOptions([defaultRESTOptions, <object>options.rest, { discord: { token: options.token } }, { redis: options.redis }])
       )
     );
     this.guilds = new GuildHub(this);
@@ -56,7 +46,7 @@ export class Client extends EventEmitter {
     };
     this.messager = new MessageClient(this);
 
-    Object.defineProperty(this, 'application', { value: null, writable: true });
+    Object.defineProperty(this, "application", { value: null, writable: true });
   }
 
   async initialize(): Promise<void> {
@@ -64,19 +54,19 @@ export class Client extends EventEmitter {
     await this.cache.connect();
     await this.messager.connect();
 
-    this.application = <Application>await this.cache.get('application');
+    this.application = <Application>await this.cache.get("application");
 
     handlers.forEach((Handler): void => {
       new Handler(this).initialize();
     });
 
-    const ready = await this.cache.get('ready');
+    const ready = await this.cache.get("ready");
     if (ready !== null) {
       const application = await this.rest.request(Routes.application());
       this.application = new Application(this, <DiscordAPIApplication>application);
-      this.emit('ready', ready);
+      this.emit("ready", ready);
     } else {
-      this.on('readyGateway', (ready) => this.emit('ready', ready));
+      this.on("readyGateway", (ready) => this.emit("ready", ready));
     }
   }
 }

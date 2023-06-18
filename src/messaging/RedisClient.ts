@@ -1,6 +1,6 @@
-import { type DiscordAPIGuild, type REDISOptions } from '@fawkes.js/api-types/';
-import { createClient, type RedisClientType } from 'redis';
-import { type Client } from '../Client.js';
+import { type DiscordAPIGuild, type REDISOptions } from "@fawkes.js/api-types/";
+import { createClient, type RedisClientType } from "redis";
+import { type Client } from "../Client.js";
 
 export class RedisClient {
   client: Client;
@@ -11,17 +11,17 @@ export class RedisClient {
 
     this.client = Client;
 
-    Object.defineProperty(this, 'cache', { value: null, writable: true });
-    Object.defineProperty(this, 'subscriber', { value: null, writable: true });
+    Object.defineProperty(this, "cache", { value: null, writable: true });
+    Object.defineProperty(this, "subscriber", { value: null, writable: true });
   }
 
   async connect(): Promise<void> {
     const url =
       (<string>this.options.url).length > 0
         ? this.options.url
-        : `redis://${<string>this.options.username}:${<string>(
-            this.options.password
-          )}@${<string>this.options.hostname}:${<string>this.options.port}`;
+        : `redis://${<string>this.options.username}:${<string>this.options.password}@${<string>this.options.hostname}:${<string>(
+            this.options.port
+          )}`;
 
     this.cache = createClient({ url });
 

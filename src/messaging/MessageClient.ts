@@ -1,6 +1,6 @@
-import { type Client } from '../Client.js';
-import { type RabbitOptions } from '@fawkes.js/api-types';
-import { connect } from 'amqplib/callback_api';
+import { type Client } from "../Client.js";
+import { type RabbitOptions } from "@fawkes.js/api-types";
+import { connect } from "amqplib/callback_api";
 
 export class MessageClient {
   options: RabbitOptions;
@@ -18,7 +18,7 @@ export class MessageClient {
     // Create a connection with the AMQP Server,
     connect(this.options.hostname, (err, connection) => {
       if (err !== null) {
-        console.log('AMQP Error - Error Connecting,');
+        console.log("AMQP Error - Error Connecting,");
         return;
       }
 
@@ -26,7 +26,7 @@ export class MessageClient {
       // Create a channel witin the connection,
       this.channel = this.connection.createChannel((err, channel) => {
         if (err !== null) {
-          console.log('AMQP Error - Error creating a channel,');
+          console.log("AMQP Error - Error creating a channel,");
           return;
         }
 
@@ -34,7 +34,7 @@ export class MessageClient {
 
         // Primary Functions:
         this.channel.consume(
-          'primary',
+          "primary",
           (message) => {
             const packet = JSON.parse(message.content.toString());
 
@@ -46,14 +46,14 @@ export class MessageClient {
         // Secondary Return Functions:
 
         // Create the exchange if it does not exist, and then bind a temporary channel to it,
-        this.channel.assertExchange('return', 'fanout', { durable: false });
-        this.channel.assertQueue('', { exclusive: true }, (err, q) => {
+        this.channel.assertExchange("return", "fanout", { durable: false });
+        this.channel.assertQueue("", { exclusive: true }, (err, q) => {
           if (err !== null) {
-            console.log('AMQP ERROR - Error asserting queue');
+            console.log("AMQP ERROR - Error asserting queue");
             return;
           }
           this.queue = q;
-          this.channel.bindQueue(q.queue, 'return', '');
+          this.channel.bindQueue(q.queue, "return", "");
 
           this.channel.consume(
             q.queue,
