@@ -6,13 +6,13 @@ import {
   Routes,
   DiscordAPICommandOptionType,
   type DiscordAPIInteraction,
-  DiscordAPIMessage,
-} from '@fawkes.js/api-types';
-import { type Client } from '../Client';
-import { User } from './User';
-import { Message } from './Message';
-import { APIEmbed, type Embed } from './APIEmbed';
-import { BaseInteraction } from './BaseInteraction';
+  type DiscordAPIMessage,
+} from "@fawkes.js/api-types";
+import { type Client } from "../Client";
+import { User } from "./User";
+import { Message } from "./Message";
+import { APIEmbed, type Embed } from "./APIEmbed";
+import { BaseInteraction } from "./BaseInteraction";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface Attachment {}
@@ -83,15 +83,12 @@ interface InteractionResponseOptions {
 export class ChatInputCommandInteraction extends BaseInteraction {
   command: string;
   options: any[];
-  constructor(
-    client: Client,
-    interaction: DiscordAPIInteraction,
-    guild: DiscordAPIGuild
-  ) {
+  constructor(client: Client, interaction: DiscordAPIInteraction, guild: DiscordAPIGuild) {
     super(client, interaction, guild);
     const options: any[] = [];
 
     if (interaction.data?.options != null) {
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
       interaction.data?.options.forEach(async (option) => {
         switch (option.type) {
           case DiscordAPICommandOptionType.SubCommand:
@@ -110,17 +107,15 @@ export class ChatInputCommandInteraction extends BaseInteraction {
           case DiscordAPICommandOptionType.Boolean:
             break;
           case DiscordAPICommandOptionType.User:
-            const member = guild.members.find(
-              (m) => m.user?.id === option.value
-            );
+            // eslint-disable-next-line no-case-declarations
+            const member = guild.members.find((m) => m.user?.id === option.value);
 
-            member?.user
-              ? options.push({
-                  name: option.name,
-                  data: new User(member.user),
-                  type: option.type,
-                })
-              : null;
+            if (member?.user)
+              options.push({
+                name: option.name,
+                data: new User(member.user),
+                type: option.type,
+              });
             break;
           case DiscordAPICommandOptionType.Channel:
             break;
@@ -151,21 +146,13 @@ export class ChatInputCommandInteraction extends BaseInteraction {
     const APIData: any = { ...data };
     APIData.embeds = data.embeds != null ? APIEmbeds(data.embeds) : [];
 
-    await this.client.rest.request(
-      Routes.createInteractionResponse(this.id, this.token),
-      { type: 4, data: APIData }
-    );
+    await this.client.rest.request(Routes.createInteractionResponse(this.id, this.token), { type: 4, data: APIData });
 
     const fetchReply = async (): Promise<Message> => {
       return new Message(
         this.client,
         <DiscordAPIMessage>(
-          await this.client.rest.request(
-            Routes.getOriginalInteractionResponse(
-              this.client?.application?.id,
-              this.token
-            )
-          )
+          await this.client.rest.request(Routes.getOriginalInteractionResponse(this.client?.application?.id, this.token))
         )
       );
     };
@@ -177,8 +164,7 @@ export class ChatInputCommandInteraction extends BaseInteraction {
     const users: any[] = [];
 
     this.options.forEach((option): void => {
-      if (option.type === DiscordAPICommandOptionType.User)
-        users.push(option.data);
+      if (option.type === DiscordAPICommandOptionType.User) users.push(option.data);
     });
     return users;
   }

@@ -1,16 +1,16 @@
-import { type Client } from '../../Client'
-import { Channel } from '../../structures/Channel'
+import { type Client } from "../../Client";
+import { Channel } from "../../structures/Channel";
 
 export class CHANNEL_CREATE {
-  client: Client
-  constructor (client: Client) {
-    this.client = client
+  client: Client;
+  constructor(client: Client) {
+    this.client = client;
   }
 
-  initialize (): void {
-    this.client.on('CHANNEL_CREATE', (packet) => {
+  initialize(): void {
+    this.client.on("CHANNEL_CREATE", (packet) => {
       void (async (packet) => {
-        const guild = await this.client.cache.get('guild:' + <string>packet.guild_id)
+        const guild = await this.client.cache.get("guild:" + <string>packet.guild_id);
 
         const cacheChannel = {
           id: packet.id,
@@ -23,14 +23,14 @@ export class CHANNEL_CREATE {
           rate_limit_per_user: packet.rate_limit_per_user,
           topic: packet.topic,
           type: packet.type,
-          version: packet.version
-        }
-        guild.channels.push(cacheChannel)
-        await this.client.cache.set('guild:' + <string>packet.guild_id, guild)
+          version: packet.version,
+        };
+        guild.channels.push(cacheChannel);
+        await this.client.cache.set("guild:" + <string>packet.guild_id, guild);
 
-        const channel = new Channel(packet)
-        this.client.emit('channelCreate', channel)
-      })(packet)
-    })
+        const channel = new Channel(packet);
+        this.client.emit("channelCreate", channel);
+      })(packet);
+    });
   }
 }

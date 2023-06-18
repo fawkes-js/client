@@ -1,7 +1,7 @@
 // import { type DiscordAPIButtonComponentButtonStyleType, type DiscordAPIEmoji, type DiscordAPIGuild, type DiscordAPIGuildMember, type DiscordAPIInteraction, type DiscordAPIMessageComponentType, type DiscordAPIUser, Routes, DiscordAPILocale} from '@fawkes.js/api-types'
 // import { type Client } from '../Client'
 // import { type Embed } from './APIEmbed'
-import { BaseInteraction } from './BaseInteraction'
+import { BaseInteraction } from "./BaseInteraction";
 
 // interface InteractionData {
 //   interaction: DiscordAPIInteraction
