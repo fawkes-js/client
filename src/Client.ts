@@ -5,7 +5,7 @@ import { REST, type RESTOptions } from "@fawkes.js/rest";
 import { GuildHub } from "./hubs/GuildHub";
 import { Application } from "./structures/Application";
 import { defaultRESTOptions, mergeOptions } from "./utils/Options";
-import { Routes, type RabbitOptions, type REDISOptions, type DiscordAPIApplication } from "@fawkes.js/api-types";
+import { Routes, type RabbitOptions, type REDISOptions, type DiscordAPIApplication } from "@fawkes.js/typings";
 import { MessageClient } from "./messaging/MessageClient";
 
 interface RESTClientOptions {

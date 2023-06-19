@@ -1,4 +1,4 @@
-import { type DiscordAPIChannel, type Snowflake } from "@fawkes.js/api-types";
+import { type DiscordAPIChannel, type Snowflake } from "@fawkes.js/typings";
 
 export class Channel {
   id: Snowflake;

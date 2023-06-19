@@ -1,5 +1,5 @@
 import { type Client } from "../Client.js";
-import { type RabbitOptions } from "@fawkes.js/api-types";
+import { type RabbitOptions } from "@fawkes.js/typings";
 import { connect } from "amqplib/callback_api";
 
 export class MessageClient {

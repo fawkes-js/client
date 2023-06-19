@@ -7,7 +7,7 @@ import {
   DiscordAPICommandOptionType,
   type DiscordAPIInteraction,
   type DiscordAPIMessage,
-} from "@fawkes.js/api-types";
+} from "@fawkes.js/typings";
 import { type Client } from "../Client";
 import { User } from "./User";
 import { Message } from "./Message";

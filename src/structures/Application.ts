@@ -1,4 +1,4 @@
-import { type DiscordAPIApplication, type Snowflake } from "@fawkes.js/api-types";
+import { type DiscordAPIApplication, type Snowflake } from "@fawkes.js/typings";
 import { type Client } from "../Client";
 import { CommandHub } from "../hubs/CommandHub";
 

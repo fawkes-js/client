@@ -1,4 +1,4 @@
-import { Routes, type DiscordAPICommandOptionType } from "@fawkes.js/api-types";
+import { Routes, type DiscordAPICommandOptionType } from "@fawkes.js/typings";
 import { type Client } from "../Client";
 
 interface CommandOption {

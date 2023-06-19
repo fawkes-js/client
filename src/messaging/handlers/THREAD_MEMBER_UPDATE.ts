@@ -1,15 +1,15 @@
 import { type Client } from "../../Client";
 
-export class MESSAGE_DELETE_BULK {
+export class THREAD_MEMBER_UPDATE {
   client: Client;
   constructor(client: Client) {
     this.client = client;
   }
 
   initialize(): void {
-    this.client.on("MESSAGE_DELETE_BULK", (packet) => {
+    this.client.on("THREAD_MEMBER_UPDATE", (packet) => {
       void (async (packet) => {
-        this.client.emit("messageDeleteBulk", "PLACE VARIABLE");
+        this.client.emit("threadMemberUpdate", "PLACE VARIABLE");
       })(packet);
     });
   }

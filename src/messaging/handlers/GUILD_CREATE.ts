@@ -1,4 +1,4 @@
-import { type DiscordAPIGuild } from "@fawkes.js/api-types";
+import { type DiscordAPIGuild } from "@fawkes.js/typings";
 import { type Client } from "../../Client";
 import { Guild } from "../../structures/Guild";
 
@@ -16,7 +16,10 @@ export class GUILD_CREATE {
 
           const guild = new Guild(this.client, packet);
           this.client.emit("guildCreate", guild);
-        } else await this.client.cache.set("guild:" + packet.id, packet);
+        }
+
+        const cacheGuild = { ...packet, autoModerationRules: [] };
+        await this.client.cache.set("guild:" + packet.id, cacheGuild);
       })(packet);
     });
   }

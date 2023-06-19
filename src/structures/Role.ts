@@ -1,4 +1,4 @@
-import { type DiscordAPIRole } from "@fawkes.js/api-types";
+import { type DiscordAPIRole } from "@fawkes.js/typings";
 
 export class Role {
   id: string;

@@ -1,4 +1,4 @@
-import { type DiscordAPIUser } from "@fawkes.js/api-types";
+import { type DiscordAPIUser } from "@fawkes.js/typings";
 
 export class User {
   id: string;

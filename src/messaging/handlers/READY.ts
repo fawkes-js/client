@@ -1,4 +1,4 @@
-import { Routes, type DiscordAPIApplication } from "@fawkes.js/api-types";
+import { Routes, type DiscordAPIApplication } from "@fawkes.js/typings";
 import { type Client } from "../../Client";
 import { Application } from "../../structures/Application";
 

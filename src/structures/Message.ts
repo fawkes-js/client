@@ -1,4 +1,4 @@
-import { type DiscordAPIMessage, type Snowflake } from "@fawkes.js/api-types";
+import { type DiscordAPIMessage, type Snowflake } from "@fawkes.js/typings";
 import { EventEmitter } from "node:events";
 import { type Client } from "../Client";
 

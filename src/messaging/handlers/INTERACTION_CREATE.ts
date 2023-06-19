@@ -1,4 +1,4 @@
-import { type DiscordAPIInteraction, DiscordAPIInteractionType, type DiscordAPIGuild } from "@fawkes.js/api-types";
+import { type DiscordAPIInteraction, DiscordAPIInteractionType, type DiscordAPIGuild } from "@fawkes.js/typings";
 import { type Client } from "../../Client";
 import { ChatInputCommandInteraction } from "../../structures/ChatInputCommandInteraction";
 import { MessageComponentInteraction } from "../../structures/MessageComponentInteraction";
