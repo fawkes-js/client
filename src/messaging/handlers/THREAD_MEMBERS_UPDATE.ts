@@ -7,9 +7,9 @@ export class CHANNEL_CREATE {
   }
 
   initialize(): void {
-    this.client.on("GUILD_SCHEDULED_EVENT_CREATE", (packet) => {
+    this.client.on("THREAD_MEMBERS_UPDATE", (packet) => {
       void (async (packet) => {
-        this.client.emit("guildScheduledEventCreate", "PLACE VARIABLE");
+        this.client.emit("threadMembersUpdate", "PLACE VARIABLE");
       })(packet);
     });
   }
