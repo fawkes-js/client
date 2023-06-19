@@ -1,6 +1,6 @@
 import { type Client } from "../../Client";
 
-export class CHANNEL_CREATE {
+export class MESSAGE_DELETE {
   client: Client;
   constructor(client: Client) {
     this.client = client;

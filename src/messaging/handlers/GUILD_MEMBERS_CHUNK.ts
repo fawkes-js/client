@@ -1,6 +1,6 @@
 import { type Client } from "../../Client";
 
-export class CHANNEL_CREATE {
+export class GUILD_MEMBERS_CHUNK {
   client: Client;
   constructor(client: Client) {
     this.client = client;

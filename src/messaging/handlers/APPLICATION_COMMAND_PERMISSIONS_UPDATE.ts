@@ -1,7 +1,7 @@
 import { type DiscordAPIGuild } from "@fawkes.js/api-types";
 import { type Client } from "../../Client";
 
-export class GUILD_CREATE {
+export class APPLICATION_COMMAND_PERMISSIONS_UPDATE {
   client: Client;
   constructor(client: Client) {
     this.client = client;

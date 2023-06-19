@@ -1,6 +1,6 @@
 import { type Client } from "../../Client";
 
-export class CHANNEL_CREATE {
+export class AUTO_MODERATION_RULE_CREATE {
   client: Client;
   constructor(client: Client) {
     this.client = client;

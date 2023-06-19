@@ -1,6 +1,6 @@
 import { type Client } from "../../Client";
 
-export class CHANNEL_CREATE {
+export class STAGE_INSTANCE_UPDATE {
   client: Client;
   constructor(client: Client) {
     this.client = client;

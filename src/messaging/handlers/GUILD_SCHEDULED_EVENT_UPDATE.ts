@@ -1,6 +1,6 @@
 import { type Client } from "../../Client";
 
-export class CHANNEL_CREATE {
+export class GUILD_SCHEDULED_EVENT_UPDATE {
   client: Client;
   constructor(client: Client) {
     this.client = client;
