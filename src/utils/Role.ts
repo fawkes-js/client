@@ -1,4 +1,4 @@
-import { type DiscordAPIGuild, type DiscordAPIGuildMember, type DiscordAPIRole, type Snowflake } from "@fawkes.js/api-types";
+import { type DiscordAPIGuild, type DiscordAPIGuildMember, type DiscordAPIRole, type Snowflake } from "@fawkes.js/typings";
 import { type Client } from "../Client";
 
 async function getMember(client: Client, guildId: Snowflake, userId: Snowflake): Promise<any> {

@@ -1,4 +1,4 @@
-import { type DiscordAPIChannel } from "@fawkes.js/api-types";
+import { type DiscordAPIChannel } from "@fawkes.js/typings";
 import { type Client } from "../../Client";
 import { Channel } from "../../structures/Channel";
 

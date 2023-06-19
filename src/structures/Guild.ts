@@ -1,4 +1,4 @@
-import { type DiscordAPIGuild, type DiscordAPIGuildMember } from "@fawkes.js/api-types";
+import { type DiscordAPIGuild, type DiscordAPIGuildMember } from "@fawkes.js/typings";
 import { type Client } from "../Client";
 import { ChannelHub } from "../hubs/ChannelHub";
 import { GuildMembersHub } from "../hubs/GuildMembersHub";

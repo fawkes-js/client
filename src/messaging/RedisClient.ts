@@ -1,4 +1,4 @@
-import { type DiscordAPIGuild, type REDISOptions } from "@fawkes.js/api-types/";
+import { type DiscordAPIGuild, type REDISOptions } from "@fawkes.js/typings";
 import { createClient, type RedisClientType } from "redis";
 import { type Client } from "../Client.js";
 

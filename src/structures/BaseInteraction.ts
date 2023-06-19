@@ -4,7 +4,7 @@ import {
   type DiscordAPIInteraction,
   type DiscordAPIGuild,
   type DiscordAPIGuildMember,
-} from "@fawkes.js/api-types";
+} from "@fawkes.js/typings";
 import { type Client } from "../Client";
 import { Guild } from "./Guild";
 import { GuildMember } from "./GuildMember";
