@@ -1,4 +1,6 @@
+import { type DiscordAPIAutoModerationRule, type FawkesAutoModerationRule, type FawkesGuild } from "@fawkes.js/typings";
 import { type Client } from "../../Client";
+import { AutoModerationRule } from "../../structures/AutoModerationRule";
 
 export class AUTO_MODERATION_RULE_DELETE {
   client: Client;
@@ -7,9 +9,16 @@ export class AUTO_MODERATION_RULE_DELETE {
   }
 
   initialize(): void {
-    this.client.on("AUTO_MODERATION_RULE_DELETE", (packet) => {
-      void (async (packet) => {
-        this.client.emit("autoModerationRuleDelete", "PLACE VARIABLE");
+    this.client.on("AUTO_MODERATION_RULE_DELETE", (packet: DiscordAPIAutoModerationRule) => {
+      void (async (packet: DiscordAPIAutoModerationRule) => {
+        const cacheGuild: FawkesGuild = await this.client.cache.get("guild:" + <string>packet.guild_id);
+        cacheGuild.autoModerationRules.splice(
+          cacheGuild.autoModerationRules.findIndex((rule: FawkesAutoModerationRule) => rule.id === packet.id),
+          1
+        );
+        await this.client.cache.set("guild:" + <string>packet.guild_id, cacheGuild);
+
+        this.client.emit("autoModerationRuleDelete", new AutoModerationRule(this.client, packet));
       })(packet);
     });
   }

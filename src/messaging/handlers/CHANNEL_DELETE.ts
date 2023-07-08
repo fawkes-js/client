@@ -9,15 +9,17 @@ export class CHANNEL_DELETE {
   }
 
   initialize(): void {
-    this.client.on("CHANNEL_DELETE", (packet) => {
-      void (async (packet) => {
-        const guild = await this.client.cache.get("guild:" + <string>packet.guild_id);
+    this.client.on("CHANNEL_DELETE", (packet: DiscordAPIChannel) => {
+      void (async (packet: DiscordAPIChannel) => {
+        const cacheGuild = await this.client.cache.get("guild:" + packet.guild_id);
 
-        guild.channels = guild.channels.filter((channel: DiscordAPIChannel) => channel.id !== packet.id);
-        await this.client.cache.set("guild:" + <string>packet.guild_id, guild);
+        cacheGuild.channels.splice(
+          cacheGuild.channels.findIndex((id: string) => id === packet.id),
+          1
+        );
+        await this.client.cache.set("channel:" + packet.guild_id, cacheGuild);
 
-        const channel = new Channel(packet);
-        this.client.emit("channelCreate", channel);
+        this.client.emit("channelCreate", new Channel(this.client, packet));
       })(packet);
     });
   }

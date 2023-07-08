@@ -38,9 +38,8 @@ export class RedisClient {
     return await this.cache.set(id, JSON.stringify(data));
   }
 
-  async delete(id: string): Promise<any> {
-    const key = `guild:${id}`;
-    return await this.cache.del(key);
+  async del(id: string): Promise<any> {
+    return await this.cache.del(id);
   }
 
   async has(id: string): Promise<any> {
