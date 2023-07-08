@@ -1,4 +1,7 @@
+import { type DiscordAPIUser } from "@fawkes.js/typings";
 import { type Client } from "../../Client";
+import { User } from "../../structures/User";
+import { type CacheGuild } from "../structures/CacheGuild";
 
 export class GUILD_BAN_REMOVE {
   client: Client;
@@ -7,9 +10,17 @@ export class GUILD_BAN_REMOVE {
   }
 
   initialize(): void {
-    this.client.on("GUILD_BAN_REMOVE", (packet) => {
+    this.client.on("GUILD_BAN_REMOVE", (packet: { guild_id: string; user: DiscordAPIUser }) => {
       void (async (packet) => {
-        this.client.emit("guildBanRemove", "PLACE VARIABLE");
+        const cacheGuild: CacheGuild = await this.client.cache.get("guild:" + packet.guild_id);
+
+        cacheGuild.bans.splice(
+          cacheGuild.bans.findIndex((id: string) => id === packet.user.id),
+          1
+        );
+        await this.client.cache.set("guild:" + packet.guild_id, cacheGuild);
+
+        this.client.emit("guildBanRemove", new User(packet.user));
       })(packet);
     });
   }

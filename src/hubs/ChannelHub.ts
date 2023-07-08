@@ -16,7 +16,7 @@ export class ChannelHub {
     const cachedGuild = await this.client.cache.get("guild:" + this.guild.id);
     const channel = cachedGuild.channels.find((channel: DiscordAPIChannel) => channel.id === id);
 
-    if (channel !== null) return new Channel(channel);
+    if (channel !== null) return new Channel(this.client, channel);
     else return null;
   }
 }

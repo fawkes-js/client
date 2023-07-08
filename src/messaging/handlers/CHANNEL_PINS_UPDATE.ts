@@ -26,8 +26,7 @@ export class CHANNEL_PINS_UPDATE {
           );
         }
 
-        const channel = new Channel(packet);
-        this.client.emit("channelsPinsUpdate", channel);
+        this.client.emit("channelsPinsUpdate", new Channel(this.client, packet));
       })(packet);
     });
   }

@@ -1,6 +1,7 @@
 import { type DiscordAPIGuild } from "@fawkes.js/typings";
 import { type Client } from "../../Client";
 import { Guild } from "../../structures/Guild";
+import { CacheGuild } from "../structures/CacheGuild";
 
 export class GUILD_CREATE {
   client: Client;
@@ -11,15 +12,34 @@ export class GUILD_CREATE {
   initialize(): void {
     this.client.on("GUILD_CREATE", (packet) => {
       void (async (packet: DiscordAPIGuild) => {
-        if ((await this.client.cache.has("guild:" + packet.id)) === false) {
-          await this.client.cache.set("guild:" + packet.id, packet);
+        const cacheGuild: CacheGuild = await this.client.cache.get("guild:" + packet.id);
+        if (cacheGuild) {
+          const newGuild: CacheGuild = new CacheGuild(packet);
 
-          const guild = new Guild(this.client, packet);
-          this.client.emit("guildCreate", guild);
-        }
+          // function update(x, y): any {
+          //   // if (Array.isArray(x)) {
+          //   //   return x.map((element, i) => update(element, y[i]));
+          //   // }
 
-        const cacheGuild = { ...packet, autoModerationRules: [] };
-        await this.client.cache.set("guild:" + packet.id, cacheGuild);
+          //   if (typeof x === "object") {
+          //     console.log("--//--");
+          //     return Object.keys(x).reduce((obj: any, k) => console.log("hi"));
+          //   }
+
+          //   return y;
+          // }
+
+          // // console.log(newGuild, "==//==", cacheGuild);
+          // console.log(update(cacheGuild, newGuild));
+
+          // console.log(cacheGuild, "--//--", newGuild);
+          await this.client.cache.set("guild:" + packet.id, Object.assign(cacheGuild, newGuild));
+
+          this.client.emit("guildCreate", new Guild(this.client, packet));
+        } else await this.client.cache.set("guild:" + packet.id, new CacheGuild(packet));
+
+        // console.log(packet.members[0].user, "---/---");
+        // console.log((await this.client.cache.get("guild:" + packet.id)).members[0].user);
       })(packet);
     });
   }
