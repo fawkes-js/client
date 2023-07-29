@@ -1,4 +1,4 @@
-import { Routes, type DiscordAPICommandOptionType } from "@fawkes.js/typings";
+import { Routes, type DiscordAPICommandOptionType, DiscordAPIApplicationCommandType } from "@fawkes.js/typings";
 import { type Client } from "../Client";
 
 interface CommandOption {
@@ -8,6 +8,7 @@ interface CommandOption {
   required: boolean;
 }
 interface CommandOptions2 {
+  type: DiscordAPIApplicationCommandType;
   name: string;
   description: string;
   options?: CommandOption[];
@@ -20,27 +21,32 @@ export class CommandHub {
   }
 
   async create(options: CommandOptions2): Promise<void> {
-    function deepEqual(x, y): boolean {
-      const ok = Object.keys;
-      const tx = typeof x;
-      const ty = typeof y;
-      return x && y && tx === "object" && tx === ty
-        ? ok(x).length === ok(y).length && ok(x).every((key) => deepEqual(x[key], y[key]))
-        : x === y;
-    }
+    // function deepEqual(x, y): boolean {
+    //   const ok = Object.keys;
+    //   const tx = typeof x;
+    //   const ty = typeof y;
+    //   return x && y && tx === "object" && tx === ty
+    //     ? ok(x).length === ok(y).length && ok(x).every((key) => deepEqual(x[key], y[key]))
+    //     : x === y;
+    // }
     const createCommand = async (): Promise<void> => {
+      if (!options.type) options.type = DiscordAPIApplicationCommandType.ChatInput;
       const command = await this.client.rest.request(Routes.createApplicationCommand(this.client.application?.id), options);
       void this.client.cache.set(`command:${options.name}`, {
         id: command.id,
         options,
       });
     };
-    const cachedCommand = await this.client.cache.get(`command:${options.name}`);
-    if (cachedCommand) {
-      if (!deepEqual(cachedCommand.options, options)) void createCommand();
-      else void createCommand();
-    }
+    await createCommand();
+    // const cachedCommand = await this.client.cache.get(`command:${options.name}`);
+    // if (cachedCommand) {
+    //   if (!deepEqual(cachedCommand.options, options)) void createCommand();
+    //   else void createCommand();
+    // }
   }
 
-  delete(): void {}
+  async delete(id?: string): Promise<void> {
+    if (id) await this.client.rest.request(Routes.deleteApplicationCommand(this.client.application?.id, id));
+    else await this.client.rest.request(Routes.bulkUpdateApplicationCommand(this.client.application?.id), []);
+  }
 }
