@@ -12,14 +12,12 @@ export class CHANNEL_UPDATE {
   initialize(): void {
     this.client.on("CHANNEL_UPDATE", (packet: DiscordAPIChannel) => {
       void (async (packet) => {
-        console.log(packet);
         const cacheGuild: CacheGuild = await this.client.cache.get("guild:" + packet.guild_id);
 
         const cacheChannel = cacheGuild.channels.find((channel: CacheChannel) => channel.id === packet.id);
 
         const newChannel: CacheChannel = new CacheChannel(packet);
 
-        console.log(cacheChannel, "--//--", newChannel);
         this.client.emit("channelUpdate", new Channel(this.client, packet));
       })(packet);
     });

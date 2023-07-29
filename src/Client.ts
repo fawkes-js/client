@@ -50,6 +50,7 @@ export class Client extends EventEmitter {
   }
 
   async initialize(): Promise<void> {
+    console.log("INIT RUN!");
     void this.rest.initialise();
     await this.cache.connect();
     await this.messager.connect();

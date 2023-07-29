@@ -1,15 +1,7 @@
-import { type DiscordAPIMessage, type Snowflake } from "@fawkes.js/typings";
-import { EventEmitter } from "node:events";
+import { type DiscordAPIGuild, type DiscordAPIInteraction, type DiscordAPIMessage, type Snowflake } from "@fawkes.js/typings";
 import { type Client } from "../Client";
-
-class Collector extends EventEmitter {
-  temp: string;
-  constructor() {
-    super();
-
-    this.temp = "temp";
-  }
-}
+import { MessageComponentInteraction } from "./interactions/MessageComponentInteraction";
+import { Collector, type CollectorOptions } from "./Collector";
 
 export class Message {
   id: Snowflake;
@@ -27,14 +19,39 @@ export class Message {
 
   delete(): void {}
 
-  async createCollector(): Promise<Collector> {
-    const collector = new Collector();
+  edit(): void {}
+
+  async createCollector(options?: CollectorOptions): Promise<Collector> {
+    const collector = new Collector(options ?? {}, this.client, this.id);
+
+    if (options?.time)
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+      setTimeout(async () => {
+        await collector.stop("Time expired.");
+      }, options?.time);
 
     await this.client.cache.set("event:message:" + this.id, this.client.messager.queue.queue);
 
-    this.client.on("event:message" + this.id, (interaction) => {
-      collector.emit("collect", interaction);
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    this.client.on("event:message:" + this.id, async (interaction: DiscordAPIInteraction): Promise<void> => {
+      collector.collected += 1;
+
+      if (collector.limit && collector.collected > collector.limit) await collector.stop("Limit reached.");
+
+      const guild: DiscordAPIGuild = await this.client.cache.get(`guild:${<string>interaction.guild_id}`);
+      if (!guild) {
+        console.log("need to throw an error here");
+        return;
+      }
+
+      const channel = guild.channels.find((channel) => channel.id === interaction.channel_id);
+      if (!channel) return; // THROW AN ERROR
+
+      collector.emit("collect", new MessageComponentInteraction(this.client, interaction, guild, channel));
+
+      if (collector.limit && collector.collected >= collector.limit) await collector.stop("Limit reached.");
     });
+
     return collector;
   }
 }

@@ -48,6 +48,7 @@ export class MessageClient {
         // Create the exchange if it does not exist, and then bind a temporary channel to it,
         this.channel.assertExchange("return", "fanout", { durable: false });
         this.channel.assertQueue("", { exclusive: true }, (err, q) => {
+          // console.log(q);
           if (err !== null) {
             console.log("AMQP ERROR - Error asserting queue");
             return;
