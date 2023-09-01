@@ -1,7 +1,7 @@
 import {
   type DiscordAPIInteractionType,
   type DiscordAPILocale,
-  type DiscordAPIInteraction,
+  type DiscordAPIBaseInteraction,
   type DiscordAPIGuild,
   type DiscordAPIGuildMember,
   type DiscordAPIUser,
@@ -29,7 +29,12 @@ export class BaseInteraction {
   channelId: string | undefined;
   guildId: string | undefined;
   guildLocale: string | null;
-  constructor(client: Client, interaction: DiscordAPIInteraction, guild: DiscordAPIGuild, channel: DiscordAPIChannel) {
+  constructor(
+    client: Client,
+    interaction: DiscordAPIBaseInteraction<DiscordAPIInteractionType, unknown>,
+    guild: DiscordAPIGuild,
+    channel: DiscordAPIChannel
+  ) {
     Object.defineProperty(this, "client", { value: client });
 
     Object.defineProperty(this, "token", { value: interaction.token });
@@ -52,7 +57,7 @@ export class BaseInteraction {
 
     this.member = interaction.member !== null ? new GuildMember(client, guild, <DiscordAPIGuildMember>interaction.member) : null;
 
-    this.user = interaction.user ? new User(interaction.user) : new User(<DiscordAPIUser>interaction?.member?.user);
+    this.user = interaction.user ? new User(client, interaction.user) : new User(client, <DiscordAPIUser>interaction?.member?.user);
 
     this.locale = interaction.locale;
 

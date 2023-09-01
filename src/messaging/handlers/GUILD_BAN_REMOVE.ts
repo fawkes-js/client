@@ -20,7 +20,7 @@ export class GUILD_BAN_REMOVE {
         );
         await this.client.cache.set("guild:" + packet.guild_id, cacheGuild);
 
-        this.client.emit("guildBanRemove", new User(packet.user));
+        this.client.emit("guildBanRemove", new User(this.client, packet.user));
       })(packet);
     });
   }

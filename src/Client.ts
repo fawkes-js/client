@@ -20,6 +20,7 @@ interface ClientOptions {
   rest?: RESTClientOptions;
   token: string;
   rabbit: RabbitOptions;
+  db?: any;
 }
 
 export class Client extends EventEmitter {
@@ -30,6 +31,7 @@ export class Client extends EventEmitter {
   ready: { cache: boolean; subscriber: boolean };
   application!: Application;
   messager: MessageClient;
+  db: any;
   constructor(options: ClientOptions) {
     super();
     this.options = options;
@@ -46,12 +48,13 @@ export class Client extends EventEmitter {
     };
     this.messager = new MessageClient(this);
 
+    this.db = options.db ?? null;
+
     Object.defineProperty(this, "application", { value: null, writable: true });
   }
 
   async initialize(): Promise<void> {
-    console.log("INIT RUN!");
-    void this.rest.initialise();
+    await this.rest.initialise();
     await this.cache.connect();
     await this.messager.connect();
 
@@ -62,12 +65,21 @@ export class Client extends EventEmitter {
     });
 
     const ready = await this.cache.get("ready");
+
     if (ready !== null) {
       const application = await this.rest.request(Routes.application());
       this.application = new Application(this, <DiscordAPIApplication>application);
+      if (this.options.db) await this._initializeDb();
+
       this.emit("ready", ready);
     } else {
+      if (this.options.db) await this._initializeDb();
+
       this.on("readyGateway", (ready) => this.emit("ready", ready));
     }
+  }
+
+  private async _initializeDb(): Promise<void> {
+    await this.db.initialize();
   }
 }

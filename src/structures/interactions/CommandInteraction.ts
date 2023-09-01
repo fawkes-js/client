@@ -2,7 +2,7 @@ import {
   DiscordAPICommandOptionType,
   type DiscordAPIChannel,
   type DiscordAPIGuild,
-  type DiscordAPIInteraction,
+  type DiscordAPIApplicationCommandInteraction,
   type DiscordAPIApplicationCommandInteractionDataOption,
   type DiscordAPIMessageComponentType,
   type DiscordAPIButtonComponentButtonStyleType,
@@ -14,7 +14,7 @@ import {
 import { type Client } from "../../Client";
 import { BaseInteraction } from "./BaseInteraction";
 import { User } from "../User";
-import { type Embed } from "../APIEmbed";
+import { APIEmbed, type Embed } from "../APIEmbed";
 import { Message } from "../Message";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -34,7 +34,7 @@ interface StringSelectComponentOption {
   label: string;
   value: string;
   description?: string;
-  emoji: any;
+  emoji?: any;
 }
 interface StringSelectComponent {
   type: DiscordAPIMessageComponentType.StringSelect;
@@ -62,7 +62,7 @@ interface ChannelSelectComponent {
   type: DiscordAPIMessageComponentType.ChannelSelect;
 }
 
-interface ActionRowComponent {
+export interface ActionRowComponent {
   type: DiscordAPIMessageComponentType.ActionRow;
   components: Array<
     | ButtonComponent
@@ -87,7 +87,11 @@ interface InteractionResponseOptions {
 export interface InteractionResponseEditOptions {
   maintainDefaults: true;
 }
-function optionsResolver(interactionOptions: DiscordAPIApplicationCommandInteractionDataOption[], guild: DiscordAPIGuild): any[] {
+function optionsResolver(
+  client: Client,
+  interactionOptions: DiscordAPIApplicationCommandInteractionDataOption[],
+  guild: DiscordAPIGuild
+): any[] {
   const options: any[] = [];
 
   if (interactionOptions != null) {
@@ -116,7 +120,7 @@ function optionsResolver(interactionOptions: DiscordAPIApplicationCommandInterac
           if (member?.user)
             options.push({
               name: option.name,
-              data: new User(member.user),
+              data: new User(client, member.user),
               type: option.type,
             });
           break;
@@ -144,7 +148,12 @@ export class CommandInteraction extends BaseInteraction {
   deferred: boolean;
   replied: boolean;
   private _response: undefined | InteractionResponseOptions;
-  constructor(client: Client, interaction: DiscordAPIInteraction, guild: DiscordAPIGuild, channel: DiscordAPIChannel) {
+  constructor(
+    client: Client,
+    interaction: DiscordAPIApplicationCommandInteraction,
+    guild: DiscordAPIGuild,
+    channel: DiscordAPIChannel
+  ) {
     super(client, interaction, guild, channel);
 
     this.commandId = interaction.data?.id;
@@ -153,7 +162,7 @@ export class CommandInteraction extends BaseInteraction {
 
     this.commandType = interaction.data?.type;
 
-    this.options = interaction.data?.options ? optionsResolver(interaction.data.options, guild) : [];
+    this.options = interaction.data?.options ? optionsResolver(client, interaction.data.options, guild) : [];
 
     this.deferred = false;
 
@@ -171,11 +180,14 @@ export class CommandInteraction extends BaseInteraction {
     let flags = 0;
     if (data.ephemeral) flags = (1 << 6) | flags;
 
+    const embeds: APIEmbed[] = [];
+
+    data.embeds?.forEach((embed) => embeds.push(new APIEmbed(embed)));
     await this.client.rest.request(Routes.interactionCallback(this.id, this.token), {
       type: DiscordAPIInteractionCallbackType.ChannelMessageWithSource,
       data: {
         content: data.content ?? "",
-        embeds: data.embeds ?? [],
+        embeds: embeds ?? [],
         components: data.components ?? [],
         attachments: data.attachments ?? [],
         flags,

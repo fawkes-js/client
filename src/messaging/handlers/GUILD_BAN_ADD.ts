@@ -17,7 +17,7 @@ export class GUILD_BAN_ADD {
         cacheGuild.bans.push(packet.user.id);
 
         await this.client.cache.set("guild:" + packet.guild_id, cacheGuild);
-        this.client.emit("guildBanAdd", new User(packet.user));
+        this.client.emit("guildBanAdd", new User(this.client, packet.user));
       })(packet);
     });
   }

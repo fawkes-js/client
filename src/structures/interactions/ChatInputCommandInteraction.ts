@@ -1,7 +1,7 @@
 import {
   type DiscordAPIGuild,
   DiscordAPICommandOptionType,
-  type DiscordAPIInteraction,
+  type DiscordAPIApplicationCommandInteraction,
   type DiscordAPIChannel,
 } from "@fawkes.js/typings";
 import { type Client } from "../../Client";
@@ -14,7 +14,12 @@ export class ChatInputCommandInteraction extends CommandInteraction {
   command: string;
   options: any[];
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
-  constructor(client: Client, interaction: DiscordAPIInteraction, guild: DiscordAPIGuild, channel: DiscordAPIChannel) {
+  constructor(
+    client: Client,
+    interaction: DiscordAPIApplicationCommandInteraction,
+    guild: DiscordAPIGuild,
+    channel: DiscordAPIChannel
+  ) {
     super(client, interaction, guild, channel);
   }
 
