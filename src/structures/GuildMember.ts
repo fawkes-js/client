@@ -6,16 +6,16 @@ import { User } from "./User";
 import { type Role } from "./Role";
 
 export class GuildMember {
+  client!: Client;
   user: User;
   roles: GuildMemberRoleHub;
-  client!: Client;
   guild: Guild;
   constructor(client: Client, guild: DiscordAPIGuild, member: DiscordAPIGuildMember) {
     Object.defineProperty(this, "client", { value: client });
 
     this.guild = new Guild(client, guild);
 
-    this.user = new User(<DiscordAPIUser>member.user);
+    this.user = new User(client, <DiscordAPIUser>member.user);
 
     this.roles = new GuildMemberRoleHub(client, guild, member);
   }
@@ -50,5 +50,17 @@ export class GuildMember {
     if (this.user.id === this.guild.owner?.id) return false;
     if (this.user.id === this.client.application?.client.id) return false;
     else return true;
+  }
+
+  async dbMember(): Promise<object | undefined> {
+    if (this.client.db) return this.client.db.getGuildMember(this.user.id, this.guild.id);
+  }
+
+  async dbUser(): Promise<object | undefined> {
+    if (this.client.db) return this.client.db.getUser(this.user.id);
+  }
+
+  async dbGuild(): Promise<object | undefined> {
+    if (this.client.db) return this.client.db.getGuild(this.guild.id);
   }
 }

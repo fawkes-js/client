@@ -1,8 +1,10 @@
 import {
-  type DiscordAPIInteraction,
+  type DiscordAPIBaseInteraction,
   DiscordAPIInteractionType,
   type DiscordAPIGuild,
   DiscordAPIApplicationCommandType,
+  type DiscordAPIApplicationCommandInteraction,
+  type DiscordAPIMessageComponentInteraction,
 } from "@fawkes.js/typings";
 import { type Client } from "../../Client";
 import { ChatInputCommandInteraction } from "../../structures/interactions/ChatInputCommandInteraction";
@@ -21,7 +23,10 @@ export class INTERACTION_CREATE {
 
   initialize(): void {
     this.client.on("INTERACTION_CREATE", (packet) => {
-      void (async (packet: DiscordAPIInteraction) => {
+      void (async (packet: DiscordAPIBaseInteraction<DiscordAPIInteractionType, unknown>) => {
+        this.client.db.updateGuildMember(packet.member ? packet.member?.user?.id : packet.user?.id, packet.guild_id);
+        this.client.db.updateUser(packet.member ? packet.member?.user?.id : packet.user?.id);
+
         let interaction!: BaseInteraction;
 
         const guild: DiscordAPIGuild =
@@ -33,15 +38,20 @@ export class INTERACTION_CREATE {
 
         switch (packet.type) {
           case DiscordAPIInteractionType.ApplicationCommand:
-            if (packet.data?.type === DiscordAPIApplicationCommandType.ChatInput)
-              interaction = new ChatInputCommandInteraction(this.client, packet, guild, channel);
-            else if (packet.data?.type === DiscordAPIApplicationCommandType.Message) {
-              interaction = new MessageCommandInteraction(this.client, packet, guild, channel);
-            } else if (packet.data?.type === DiscordAPIApplicationCommandType.User)
-              interaction = new UserCommandInteraction(this.client, packet, guild, channel);
+            // eslint-disable-next-line no-case-declarations
+            const commandPacket = <DiscordAPIApplicationCommandInteraction>packet;
+
+            if (commandPacket.data?.type === DiscordAPIApplicationCommandType.ChatInput)
+              interaction = new ChatInputCommandInteraction(this.client, commandPacket, guild, channel);
+            else if (commandPacket.data?.type === DiscordAPIApplicationCommandType.Message) {
+              interaction = new MessageCommandInteraction(this.client, commandPacket, guild, channel);
+            } else if (commandPacket.data?.type === DiscordAPIApplicationCommandType.User)
+              interaction = new UserCommandInteraction(this.client, commandPacket, guild, channel);
             break;
           case DiscordAPIInteractionType.MessageComponent:
-            interaction = new MessageComponentInteraction(this.client, packet, guild, channel);
+            // eslint-disable-next-line no-case-declarations
+            const componentPacket = <DiscordAPIMessageComponentInteraction>packet;
+            interaction = new MessageComponentInteraction(this.client, componentPacket, guild, channel);
             break;
           case DiscordAPIInteractionType.ApplicationCommandAutocomplete:
             break;

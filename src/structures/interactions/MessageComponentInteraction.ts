@@ -3,10 +3,10 @@ import {
   type DiscordAPIButtonComponentButtonStyleType,
   type DiscordAPIEmoji,
   type DiscordAPIGuild,
-  type DiscordAPIInteraction,
-  type DiscordAPIMessageComponentType,
+  DiscordAPIMessageComponentType,
   type DiscordAPIMessageComponentEmoji,
   type DiscordAPIChannel,
+  type DiscordAPIMessageComponentInteraction,
 } from "@fawkes.js/typings";
 import { type Client } from "../../Client";
 import { type Embed } from "./../APIEmbed";
@@ -80,18 +80,24 @@ interface InteractionResponseOptions {
 }
 
 export class MessageComponentInteraction extends BaseInteraction {
-  interaction: DiscordAPIInteraction;
-  constructor(client: Client, interaction: DiscordAPIInteraction, guild: DiscordAPIGuild, channel: DiscordAPIChannel) {
+  data: any;
+  componentType: any;
+  componentId: string | undefined;
+  constructor(client: Client, interaction: DiscordAPIMessageComponentInteraction, guild: DiscordAPIGuild, channel: DiscordAPIChannel) {
     super(client, interaction, guild, channel);
-    // this.interaction = interaction;
-  }
+    this.data = interaction.data;
 
-  getData(): any {
-    console.log("LETS GET DATA!");
-    // console.log(this.interaction);
+    this.componentType = interaction.data?.component_type;
+
+    this.componentId = interaction.data?.custom_id;
   }
 
   async deferUpdate(): Promise<void> {
     await this.client.rest.request(Routes.interactionCallback(this.id, this.token), { type: 6 });
+  }
+
+  isButton(): true | false {
+    if (this.componentType === DiscordAPIMessageComponentType.Button) return true;
+    else return false;
   }
 }

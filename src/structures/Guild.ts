@@ -27,7 +27,7 @@ export class Guild {
 
     this.description = guild.description;
 
-    this.owner = user != null ? new User(user) : null;
+    this.owner = user != null ? new User(client, user) : null;
 
     this.afkTimeout = guild.afk_timeout;
 
@@ -41,4 +41,8 @@ export class Guild {
   }
 
   leave(): void {}
+
+  async dbGuild(): Promise<object | undefined> {
+    if (this.client.db) return this.client.db.getGuild(this.id);
+  }
 }

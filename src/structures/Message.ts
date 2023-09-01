@@ -1,4 +1,9 @@
-import { type DiscordAPIGuild, type DiscordAPIInteraction, type DiscordAPIMessage, type Snowflake } from "@fawkes.js/typings";
+import {
+  type DiscordAPIGuild,
+  type DiscordAPIMessage,
+  type Snowflake,
+  type DiscordAPIMessageComponentInteraction,
+} from "@fawkes.js/typings";
 import { type Client } from "../Client";
 import { MessageComponentInteraction } from "./interactions/MessageComponentInteraction";
 import { Collector, type CollectorOptions } from "./Collector";
@@ -24,16 +29,28 @@ export class Message {
   async createCollector(options?: CollectorOptions): Promise<Collector> {
     const collector = new Collector(options ?? {}, this.client, this.id);
 
-    if (options?.time)
+    let timerReset = false;
+    let timeout;
+    collector.on("timerReset", () => {
+      clearTimeout(timeout);
+      timerReset = true;
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       setTimeout(async () => {
-        await collector.stop("Time expired.");
+        if (timerReset) timerReset = false;
+        else await collector.stop("Time expired.");
+      }, options?.time);
+    });
+    if (options?.time)
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+      timeout = setTimeout(async () => {
+        if (timerReset) timerReset = false;
+        else await collector.stop("Time expired.");
       }, options?.time);
 
     await this.client.cache.set("event:message:" + this.id, this.client.messager.queue.queue);
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    this.client.on("event:message:" + this.id, async (interaction: DiscordAPIInteraction): Promise<void> => {
+    this.client.on("event:message:" + this.id, async (interaction: DiscordAPIMessageComponentInteraction): Promise<void> => {
       collector.collected += 1;
 
       if (collector.limit && collector.collected > collector.limit) await collector.stop("Limit reached.");

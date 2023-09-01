@@ -44,4 +44,9 @@ export class Collector extends EventEmitter {
     this.client.removeListener(`event:message:${this.interactionId}`, () => {});
     this.removeAllListeners();
   }
+
+  resetTimer(): void {
+    console.log("reset timer");
+    this.emit("timerReset", null);
+  }
 }
