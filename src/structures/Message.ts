@@ -29,23 +29,21 @@ export class Message {
   async createCollector(options?: CollectorOptions): Promise<Collector> {
     const collector = new Collector(options ?? {}, this.client, this.id);
 
-    let timerReset = false;
     let timeout;
+
+    const setCollectorTimeout = (): any => {
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+      return setTimeout(async () => {
+        await collector.stop("Time expired.");
+      }, options?.time);
+    };
+
+    if (options?.time) timeout = setCollectorTimeout();
+
     collector.on("timerReset", () => {
       clearTimeout(timeout);
-      timerReset = true;
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      setTimeout(async () => {
-        if (timerReset) timerReset = false;
-        else await collector.stop("Time expired.");
-      }, options?.time);
+      timeout = setCollectorTimeout();
     });
-    if (options?.time)
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      timeout = setTimeout(async () => {
-        if (timerReset) timerReset = false;
-        else await collector.stop("Time expired.");
-      }, options?.time);
 
     await this.client.cache.set("event:message:" + this.id, this.client.messager.queue.queue);
 
