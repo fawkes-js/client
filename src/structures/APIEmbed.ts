@@ -42,7 +42,7 @@ export interface Embed {
   title?: string;
   description?: string;
   timestamp?: Date;
-  color?: number;
+  color?: string;
   footer?: EmbedFooter;
   image?: EmbedImage;
   thumbnail?: EmbedThumbnail;
@@ -72,7 +72,7 @@ export class APIEmbed {
 
     this.timestamp = embed.timestamp;
 
-    this.color = embed.color;
+    this.color = embed.color ? parseInt(embed.color.replace(/#/i, ""), 16) : 0;
 
     this.footer = embed.footer;
 

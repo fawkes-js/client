@@ -34,6 +34,7 @@ export class Collector extends EventEmitter {
   }
 
   async stop(reason?: string): Promise<void> {
+    console.log("STOP!");
     if (this.ended) return;
     if (!reason) reason = undefined;
 
@@ -46,7 +47,7 @@ export class Collector extends EventEmitter {
   }
 
   resetTimer(): void {
-    console.log("reset timer");
+    console.log("RESET TIMER");
     this.emit("timerReset", null);
   }
 }

@@ -39,6 +39,7 @@ interface StringSelectComponentOption {
 interface StringSelectComponent {
   type: DiscordAPIMessageComponentType.StringSelect;
   custom_id: string;
+  disabled?: boolean;
   options: StringSelectComponentOption[];
 }
 
