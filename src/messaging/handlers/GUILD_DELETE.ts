@@ -13,7 +13,7 @@ export class GUILD_DELETE {
           this.client.emit("guildDelete", packet);
 
           await this.client.cache.del("guild:" + <string>packet.id);
-        } else await this.client.cache.patch("guild:" + <string>packet.id, packet);
+        }
       })(packet);
     });
   }

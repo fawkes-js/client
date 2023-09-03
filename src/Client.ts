@@ -1,13 +1,12 @@
 import { EventEmitter } from "node:events";
-import { RedisClient } from "./messaging/RedisClient";
 import { handlers } from "./messaging/handlers/index";
 import { REST, type RESTOptions } from "@fawkes.js/rest";
 import { GuildHub } from "./hubs/GuildHub";
 import { Application } from "./structures/Application";
 import { defaultRESTOptions, mergeOptions } from "./utils/Options";
-import { Routes, type RabbitOptions, type REDISOptions, type DiscordAPIApplication } from "@fawkes.js/typings";
-import { MessageClient } from "./messaging/MessageClient";
-
+import { Routes, type DiscordAPIApplication, type RabbitOptions } from "@fawkes.js/typings";
+import { MessageClient } from "./messaging/messaging/MessageClient";
+import { LocalClient, RedisClient, type REDISOptions } from "@fawkes.js/cache";
 interface RESTClientOptions {
   prefix?: string;
   api?: string;
@@ -16,7 +15,7 @@ interface RESTClientOptions {
 }
 
 interface ClientOptions {
-  redis: REDISOptions;
+  redis?: REDISOptions;
   rest?: RESTClientOptions;
   token: string;
   rabbit: RabbitOptions;
@@ -24,7 +23,7 @@ interface ClientOptions {
 }
 
 export class Client extends EventEmitter {
-  cache: RedisClient;
+  cache: RedisClient | LocalClient;
   options: ClientOptions;
   rest: REST;
   guilds: GuildHub;
@@ -35,11 +34,12 @@ export class Client extends EventEmitter {
   constructor(options: ClientOptions) {
     super();
     this.options = options;
-    this.cache = new RedisClient(this);
+    this.cache = options.redis ? new RedisClient(options.redis) : new LocalClient();
     this.rest = new REST(
       <RESTOptions>(
         mergeOptions([defaultRESTOptions, <object>options.rest, { discord: { token: options.token } }, { redis: options.redis }])
-      )
+      ),
+      this.cache
     );
     this.guilds = new GuildHub(this);
     this.ready = {
@@ -54,8 +54,7 @@ export class Client extends EventEmitter {
   }
 
   async initialize(): Promise<void> {
-    await this.rest.initialise();
-    await this.cache.connect();
+    await this.cache.init();
     await this.messager.connect();
 
     this.application = <Application>await this.cache.get("application");
@@ -64,7 +63,7 @@ export class Client extends EventEmitter {
       new Handler(this).initialize();
     });
 
-    const ready = await this.cache.get("ready");
+    let ready = await this.cache.get("ready");
 
     if (ready !== null) {
       const application = await this.rest.request(Routes.application());
@@ -75,7 +74,11 @@ export class Client extends EventEmitter {
     } else {
       if (this.options.db) await this._initializeDb();
 
-      this.on("readyGateway", (ready) => this.emit("ready", ready));
+      this.on("readyGateway", (r) => {
+        if (ready) return;
+        ready = r;
+        this.emit("ready", ready);
+      });
     }
   }
 

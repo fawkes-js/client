@@ -23,13 +23,15 @@ export class GuildMember {
   async ban(): Promise<void> {
     await this.client.rest.request(Routes.createGuildBan(this.guild.id, this.user.id));
 
-    const cachedGuild = await this.client.cache.get("guild:" + this.guild.id);
+    // const cachedGuild = await this.client.cache.get("guild:" + this.guild.id);
 
-    cachedGuild.members = cachedGuild.members.filter((member: any) => {
-      return member.user.id !== this.user.id;
-    });
+    // cachedGuild.members = cachedGuild.members.filter((member: any) => {
+    //   return member.user.id !== this.user.id;
+    // });
 
-    await this.client.cache.set("guild:" + this.guild.id, cachedGuild);
+    // await this.client.cache.set("guild:" + this.guild.id, cachedGuild);
+
+    await this.client.cache.del(`guild:${this.guild.id}:member:${this.user.id}`);
   }
 
   kick(): void {}

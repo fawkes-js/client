@@ -19,6 +19,7 @@ export class CHANNEL_DELETE {
         );
         await this.client.cache.set("channel:" + packet.guild_id, cacheGuild);
 
+        await this.client.cache.del(`guild:${packet.guild_id}:channel:${packet.id}`);
         this.client.emit("channelCreate", new Channel(this.client, packet));
       })(packet);
     });
