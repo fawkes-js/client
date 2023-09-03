@@ -7,6 +7,7 @@ import {
 import { type Client } from "../Client";
 import { MessageComponentInteraction } from "./interactions/MessageComponentInteraction";
 import { Collector, type CollectorOptions } from "./Collector";
+import { type RabbitMQMessageClient } from "../messaging/messaging/RabbitMQMessageClient";
 
 export class Message {
   id: Snowflake;
@@ -45,7 +46,10 @@ export class Message {
       timeout = setCollectorTimeout();
     });
 
-    await this.client.cache.set("event:message:" + this.id, this.client.messager.queue.queue);
+    if (!this.client.gateway)
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      await this.client.cache.set("event:message:" + this.id, <RabbitMQMessageClient>this.client.messager.queue.queue);
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     this.client.on("event:message:" + this.id, async (interaction: DiscordAPIMessageComponentInteraction): Promise<void> => {

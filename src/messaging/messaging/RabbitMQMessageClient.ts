@@ -2,7 +2,7 @@ import { type Client } from "../../Client.js";
 import { type RabbitOptions } from "@fawkes.js/typings";
 import { connect } from "amqplib/callback_api";
 
-export class MessageClient {
+export class RabbitMQMessageClient {
   options: RabbitOptions;
   connection: any;
   channel: any;

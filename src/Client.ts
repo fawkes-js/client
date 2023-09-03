@@ -4,9 +4,10 @@ import { REST, type RESTOptions } from "@fawkes.js/rest";
 import { GuildHub } from "./hubs/GuildHub";
 import { Application } from "./structures/Application";
 import { defaultRESTOptions, mergeOptions } from "./utils/Options";
-import { Routes, type DiscordAPIApplication, type RabbitOptions } from "@fawkes.js/typings";
-import { MessageClient } from "./messaging/messaging/MessageClient";
+import { Routes, type DiscordAPIApplication, type RabbitOptions, Events } from "@fawkes.js/typings";
+import { RabbitMQMessageClient } from "./messaging/messaging/RabbitMQMessageClient";
 import { LocalClient, RedisClient, type REDISOptions } from "@fawkes.js/cache";
+import { LocalMessageClient } from "./messaging/messaging/LocalMessageClient";
 interface RESTClientOptions {
   prefix?: string;
   api?: string;
@@ -20,6 +21,7 @@ interface ClientOptions {
   token: string;
   rabbit: RabbitOptions;
   db?: any;
+  gateway?: any;
 }
 
 export class Client extends EventEmitter {
@@ -29,8 +31,9 @@ export class Client extends EventEmitter {
   guilds: GuildHub;
   ready: { cache: boolean; subscriber: boolean };
   application!: Application;
-  messager: MessageClient;
+  messager: RabbitMQMessageClient | LocalMessageClient;
   db: any;
+  gateway: any | null;
   constructor(options: ClientOptions) {
     super();
     this.options = options;
@@ -46,7 +49,9 @@ export class Client extends EventEmitter {
       cache: false,
       subscriber: false,
     };
-    this.messager = new MessageClient(this);
+    this.messager = this.options.gateway ? new LocalMessageClient(this) : new RabbitMQMessageClient(this);
+
+    this.gateway = this.options.gateway ?? null;
 
     this.db = options.db ?? null;
 
@@ -55,6 +60,11 @@ export class Client extends EventEmitter {
 
   async initialize(): Promise<void> {
     await this.cache.init();
+
+    if (this.gateway) {
+      this.gateway.login();
+      this.gateway.on(Events.Debug, console.log);
+    }
     await this.messager.connect();
 
     this.application = <Application>await this.cache.get("application");

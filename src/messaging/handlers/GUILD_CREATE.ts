@@ -12,7 +12,7 @@ export class GUILD_CREATE {
   initialize(): void {
     this.client.on("GUILD_CREATE", (packet) => {
       void (async (packet: DiscordAPIGuild) => {
-        this.client.db.updateGuild(packet.id);
+        if (this.client.db) this.client.db.updateGuild(packet.id);
 
         const cacheGuild: CacheGuild = await this.client.cache.get("guild:" + packet.id);
         if (cacheGuild) {

@@ -24,8 +24,9 @@ export class INTERACTION_CREATE {
   initialize(): void {
     this.client.on("INTERACTION_CREATE", (packet) => {
       void (async (packet: DiscordAPIBaseInteraction<DiscordAPIInteractionType, unknown>) => {
-        this.client.db.updateGuildMember(packet.member ? packet.member?.user?.id : packet.user?.id, packet.guild_id);
-        this.client.db.updateUser(packet.member ? packet.member?.user?.id : packet.user?.id);
+        if (this.client.db)
+          this.client.db.updateGuildMember(packet.member ? packet.member?.user?.id : packet.user?.id, packet.guild_id);
+        if (this.client.db) this.client.db.updateUser(packet.member ? packet.member?.user?.id : packet.user?.id);
 
         let interaction!: BaseInteraction;
 
