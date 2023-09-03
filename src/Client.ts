@@ -1,13 +1,13 @@
 import { EventEmitter } from "node:events";
-import { RedisClient } from "./messaging/RedisClient";
 import { handlers } from "./messaging/handlers/index";
 import { REST, type RESTOptions } from "@fawkes.js/rest";
 import { GuildHub } from "./hubs/GuildHub";
 import { Application } from "./structures/Application";
 import { defaultRESTOptions, mergeOptions } from "./utils/Options";
-import { Routes, type RabbitOptions, type REDISOptions, type DiscordAPIApplication } from "@fawkes.js/typings";
-import { MessageClient } from "./messaging/MessageClient";
-
+import { Routes, type DiscordAPIApplication, type RabbitOptions, Events } from "@fawkes.js/typings";
+import { RabbitMQMessageClient } from "./messaging/messaging/RabbitMQMessageClient";
+import { LocalClient, RedisClient, type REDISOptions } from "@fawkes.js/cache";
+import { LocalMessageClient } from "./messaging/messaging/LocalMessageClient";
 interface RESTClientOptions {
   prefix?: string;
   api?: string;
@@ -16,37 +16,42 @@ interface RESTClientOptions {
 }
 
 interface ClientOptions {
-  redis: REDISOptions;
+  redis?: REDISOptions;
   rest?: RESTClientOptions;
   token: string;
   rabbit: RabbitOptions;
   db?: any;
+  gateway?: any;
 }
 
 export class Client extends EventEmitter {
-  cache: RedisClient;
+  cache: RedisClient | LocalClient;
   options: ClientOptions;
   rest: REST;
   guilds: GuildHub;
   ready: { cache: boolean; subscriber: boolean };
   application!: Application;
-  messager: MessageClient;
+  messager: RabbitMQMessageClient | LocalMessageClient;
   db: any;
+  gateway: any | null;
   constructor(options: ClientOptions) {
     super();
     this.options = options;
-    this.cache = new RedisClient(this);
+    this.cache = options.redis ? new RedisClient(options.redis) : new LocalClient();
     this.rest = new REST(
       <RESTOptions>(
         mergeOptions([defaultRESTOptions, <object>options.rest, { discord: { token: options.token } }, { redis: options.redis }])
-      )
+      ),
+      this.cache
     );
     this.guilds = new GuildHub(this);
     this.ready = {
       cache: false,
       subscriber: false,
     };
-    this.messager = new MessageClient(this);
+    this.messager = this.options.gateway ? new LocalMessageClient(this) : new RabbitMQMessageClient(this);
+
+    this.gateway = this.options.gateway ?? null;
 
     this.db = options.db ?? null;
 
@@ -54,8 +59,12 @@ export class Client extends EventEmitter {
   }
 
   async initialize(): Promise<void> {
-    await this.rest.initialise();
-    await this.cache.connect();
+    await this.cache.init();
+
+    if (this.gateway) {
+      this.gateway.login();
+      this.gateway.on(Events.Debug, console.log);
+    }
     await this.messager.connect();
 
     this.application = <Application>await this.cache.get("application");
@@ -64,7 +73,7 @@ export class Client extends EventEmitter {
       new Handler(this).initialize();
     });
 
-    const ready = await this.cache.get("ready");
+    let ready = await this.cache.get("ready");
 
     if (ready !== null) {
       const application = await this.rest.request(Routes.application());
@@ -75,7 +84,11 @@ export class Client extends EventEmitter {
     } else {
       if (this.options.db) await this._initializeDb();
 
-      this.on("readyGateway", (ready) => this.emit("ready", ready));
+      this.on("readyGateway", (r) => {
+        if (ready) return;
+        ready = r;
+        this.emit("ready", ready);
+      });
     }
   }
 

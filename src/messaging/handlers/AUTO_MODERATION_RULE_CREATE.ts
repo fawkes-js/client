@@ -12,9 +12,9 @@ export class AUTO_MODERATION_RULE_CREATE {
   initialize(): void {
     this.client.on("AUTO_MODERATION_RULE_CREATE", (packet: DiscordAPIAutoModerationRule) => {
       void (async (packet: DiscordAPIAutoModerationRule) => {
-        const cacheGuild: FawkesGuild = await this.client.cache.get("guild:" + <string>packet.guild_id);
+        const cacheGuild: FawkesGuild = await this.client.cache.get("guild:" + packet.guild_id);
         cacheGuild.autoModerationRules.push(new CacheAutoModerationRule(packet));
-        await this.client.cache.set("guild:" + <string>packet.guild_id, cacheGuild);
+        await this.client.cache.set("guild:" + packet.guild_id, cacheGuild);
 
         this.client.emit("autoModerationRuleCreate", new AutoModerationRule(this.client, packet));
       })(packet);

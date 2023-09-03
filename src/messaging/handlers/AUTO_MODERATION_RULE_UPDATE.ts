@@ -12,14 +12,14 @@ export class AUTO_MODERATION_RULE_UPDATE {
   initialize(): void {
     this.client.on("AUTO_MODERATION_RULE_UPDATE", (packet: DiscordAPIAutoModerationRule) => {
       void (async (packet: DiscordAPIAutoModerationRule) => {
-        const cacheGuild: FawkesGuild = await this.client.cache.get("guild:" + <string>packet.guild_id);
+        const cacheGuild: FawkesGuild = await this.client.cache.get("guild:" + packet.guild_id);
         cacheGuild.autoModerationRules.splice(
           cacheGuild.autoModerationRules.findIndex((rule: FawkesAutoModerationRule) => rule.id === packet.id),
           1,
           new CacheAutoModerationRule(packet)
         );
 
-        await this.client.cache.set("guild:" + <string>packet.guild_id, cacheGuild);
+        await this.client.cache.set("guild:" + packet.guild_id, cacheGuild);
 
         this.client.emit("autoModerationRuleUpdate", new AutoModerationRule(this.client, packet));
       })(packet);
