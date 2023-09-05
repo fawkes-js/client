@@ -3,25 +3,35 @@ import {
   type DiscordAPIMessage,
   type Snowflake,
   type DiscordAPIMessageComponentInteraction,
+  Routes,
 } from "@fawkes.js/typings";
 import { type Client } from "../Client";
 import { MessageComponentInteraction } from "./interactions/MessageComponentInteraction";
 import { Collector, type CollectorOptions } from "./Collector";
 import { type RabbitMQMessageClient } from "../messaging/messaging/RabbitMQMessageClient";
+import { User } from "./User";
 
 export class Message {
   id: Snowflake;
   content: string;
   client: Client;
+  message: DiscordAPIMessage;
+  author: User;
   constructor(client: Client, message: DiscordAPIMessage) {
     this.client = client;
 
     this.id = message.id;
 
     this.content = message.content;
+
+    this.message = message;
+
+    this.author = new User(this.client, message.author);
   }
 
-  reply(): void {}
+  async reply(data: { content: string }): Promise<void> {
+    await this.client.rest.request(Routes.createMessage(this.message.channel_id), { content: data.content });
+  }
 
   delete(): void {}
 

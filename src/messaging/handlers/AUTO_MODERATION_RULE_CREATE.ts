@@ -16,6 +16,7 @@ export class AUTO_MODERATION_RULE_CREATE {
         cacheGuild.autoModerationRules.push(new CacheAutoModerationRule(packet));
         await this.client.cache.set("guild:" + packet.guild_id, cacheGuild);
 
+        console.log(packet);
         this.client.emit("autoModerationRuleCreate", new AutoModerationRule(this.client, packet));
       })(packet);
     });
