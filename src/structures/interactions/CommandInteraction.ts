@@ -4,90 +4,18 @@ import {
   type DiscordAPIGuild,
   type DiscordAPIApplicationCommandInteraction,
   type DiscordAPIApplicationCommandInteractionDataOption,
-  type DiscordAPIMessageComponentType,
-  type DiscordAPIButtonComponentButtonStyleType,
-  type DiscordAPIEmoji,
   Routes,
   DiscordAPIInteractionCallbackType,
   RequestMethod,
+  type MessageResponseOptions,
+  type MessageResponseEditOptions,
 } from "@fawkes.js/typings";
 import { type Client } from "../../Client";
 import { BaseInteraction } from "./BaseInteraction";
 import { User } from "../User";
-import { APIEmbed, type Embed } from "../APIEmbed";
+import { APIEmbed } from "../APIEmbed";
 import { Message } from "../Message";
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface Attachment {}
-
-interface ButtonComponent {
-  type: 2;
-  style: DiscordAPIButtonComponentButtonStyleType;
-  label?: string;
-  emoji?: DiscordAPIEmoji;
-  custom_id?: string;
-  url?: string;
-  disabled?: boolean;
-}
-
-interface StringSelectComponentOption {
-  label: string;
-  value: string;
-  description?: string;
-  emoji?: any;
-}
-interface StringSelectComponent {
-  type: DiscordAPIMessageComponentType.StringSelect;
-  custom_id: string;
-  disabled?: boolean;
-  options: StringSelectComponentOption[];
-}
-
-interface TextInputComponent {
-  type: DiscordAPIMessageComponentType.TextInput;
-}
-
-interface UserSelectComponent {
-  type: DiscordAPIMessageComponentType.UserSelect;
-}
-
-interface RoleSelectComponent {
-  type: DiscordAPIMessageComponentType.RoleSelect;
-}
-
-interface MentionableSelectComponent {
-  type: DiscordAPIMessageComponentType.MentionableSelect;
-}
-
-interface ChannelSelectComponent {
-  type: DiscordAPIMessageComponentType.ChannelSelect;
-}
-
-export interface ActionRowComponent {
-  type: DiscordAPIMessageComponentType.ActionRow;
-  components: Array<
-    | ButtonComponent
-    | StringSelectComponent
-    | TextInputComponent
-    | UserSelectComponent
-    | RoleSelectComponent
-    | MentionableSelectComponent
-    | ChannelSelectComponent
-  >;
-}
-
-interface InteractionResponseOptions {
-  content?: string;
-  embeds?: Embed[];
-  attachments?: Attachment[];
-  fetchReply?: boolean;
-  components?: ActionRowComponent[];
-  ephemeral?: boolean;
-}
-
-export interface InteractionResponseEditOptions {
-  maintainDefaults: true;
-}
 function optionsResolver(
   client: Client,
   interactionOptions: DiscordAPIApplicationCommandInteractionDataOption[],
@@ -148,7 +76,7 @@ export class CommandInteraction extends BaseInteraction {
   options: any[] | [];
   deferred: boolean;
   replied: boolean;
-  private _response: undefined | InteractionResponseOptions;
+  private _response: undefined | MessageResponseOptions;
   constructor(
     client: Client,
     interaction: DiscordAPIApplicationCommandInteraction,
@@ -172,7 +100,7 @@ export class CommandInteraction extends BaseInteraction {
     this._response = undefined;
   }
 
-  async reply<T extends InteractionResponseOptions>(data: T): Promise<T["fetchReply"] extends true ? Message : null> {
+  async reply<T extends MessageResponseOptions>(data: T): Promise<T["fetchReply"] extends true ? Message : null> {
     if (this.replied || this.deferred)
       console.log("need to throw an error here... but this has already been replied too or deferred!");
 
@@ -225,7 +153,7 @@ export class CommandInteraction extends BaseInteraction {
     return new Message(this.client, reply);
   }
 
-  async editReply(data: InteractionResponseOptions, options?: InteractionResponseEditOptions): Promise<any> {
+  async editReply(data: MessageResponseOptions, options?: MessageResponseEditOptions): Promise<any> {
     const reply = await this.client.rest.request(
       Routes.webhookMessage(this.applicationId, this.token, "@original", RequestMethod.Patch),
       data

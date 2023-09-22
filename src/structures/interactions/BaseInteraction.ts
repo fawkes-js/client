@@ -12,6 +12,7 @@ import { Guild } from "../Guild";
 import { GuildMember } from "../GuildMember";
 import { User } from "../User";
 import { Channel } from "../Channel";
+import { DiscordSnowflake } from "../../utils/Snowflake";
 
 export class BaseInteraction {
   guild: Guild;
@@ -29,6 +30,7 @@ export class BaseInteraction {
   channelId: string | undefined;
   guildId: string | undefined;
   guildLocale: string | null;
+  createdAt: any;
   constructor(
     client: Client,
     interaction: DiscordAPIBaseInteraction<DiscordAPIInteractionType, unknown>,
@@ -64,5 +66,7 @@ export class BaseInteraction {
     this.guildLocale = interaction.guild_locale ? interaction.guild_locale : null;
 
     this.version = interaction.version;
+
+    this.createdAt = DiscordSnowflake.getTimestamp(interaction.id);
   }
 }

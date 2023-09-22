@@ -12,6 +12,7 @@ import { MessageComponentInteraction } from "../../structures/interactions/Messa
 import { UserCommandInteraction } from "../../structures/interactions/UserCommandInteraction";
 import { MessageCommandInteraction } from "../../structures/interactions/MessageCommandInteraction";
 import { type BaseInteraction } from "../../structures/interactions/BaseInteraction";
+import { getGuild } from "../../utils/CacheUpdate";
 
 export type Interaction = ChatInputCommandInteraction | MessageComponentInteraction;
 
@@ -31,10 +32,12 @@ export class INTERACTION_CREATE {
         let interaction!: BaseInteraction;
 
         const guild: DiscordAPIGuild =
-          packet.guild_id !== null ? await this.client.cache.get("guild:" + <string>packet.guild_id) : null;
+          packet.guild_id !== null
+            ? await this.client.cache.get("guild:" + <string>packet.guild_id)
+            : await getGuild(this.client, <string>packet.guild_id);
+        if (!guild) return; // THROW AN ERROR
 
         const channel = guild.channels.find((channel) => channel.id === packet.channel_id);
-
         if (!channel) return; // THROW AN ERROR
 
         switch (packet.type) {

@@ -4,6 +4,7 @@ import {
   type Snowflake,
   type DiscordAPIMessageComponentInteraction,
   Routes,
+  type MessageResponseOptions,
 } from "@fawkes.js/typings";
 import { type Client } from "../Client";
 import { MessageComponentInteraction } from "./interactions/MessageComponentInteraction";
@@ -29,8 +30,14 @@ export class Message {
     this.author = new User(this.client, message.author);
   }
 
-  async reply(data: { content: string }): Promise<void> {
-    await this.client.rest.request(Routes.createMessage(this.message.channel_id), { content: data.content });
+  async reply(data: MessageResponseOptions): Promise<void> {
+    await this.client.rest.request(Routes.createMessage(this.message.channel_id), {
+      content: data.content ?? "",
+      embeds: data.embeds ?? [],
+      components: data.components ?? [],
+      attachments: data.attachments ?? [],
+      message_reference: { message_id: this.id },
+    });
   }
 
   delete(): void {}
