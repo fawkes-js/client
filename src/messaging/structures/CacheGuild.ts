@@ -48,6 +48,7 @@ import {
   type FawkesGuildScheduledEventEntityMetadata,
   type DiscordAPIGuildScheduledEventEntityMetadata,
   type Snowflake,
+  type FawkesApplicationCommandPermissionStructure,
 } from "@fawkes.js/typings";
 import { CacheRole } from "./CacheRole";
 import { CacheEmoji } from "./CacheEmoji";
@@ -131,6 +132,7 @@ export class CacheGuild implements FawkesGuild {
     });
     this.autoModerationRules = [];
     this.bans = [];
+    this.applicationCommandPermissions = [];
   }
 
   id: string;
@@ -186,6 +188,7 @@ export class CacheGuild implements FawkesGuild {
   guildScheduledEvents: FawkesGuildScheduledEvent[];
   autoModerationRules: FawkesAutoModerationRule[];
   bans: Snowflake[];
+  applicationCommandPermissions: FawkesApplicationCommandPermissionStructure[];
 }
 
 export class CacheGuildScheduledEventEntityMetadata implements FawkesGuildScheduledEventEntityMetadata {

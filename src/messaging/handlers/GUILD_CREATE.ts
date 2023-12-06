@@ -35,6 +35,7 @@ export class GUILD_CREATE {
           // console.log(update(cacheGuild, newGuild));
 
           // console.log(cacheGuild, "--//--", newGuild);
+
           await this.client.cache.set("guild:" + packet.id, Object.assign(cacheGuild, newGuild));
 
           this.client.emit("guildCreate", new Guild(this.client, packet));

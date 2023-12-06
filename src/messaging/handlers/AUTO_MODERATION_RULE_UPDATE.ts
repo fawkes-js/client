@@ -21,7 +21,7 @@ export class AUTO_MODERATION_RULE_UPDATE {
 
         await this.client.cache.set("guild:" + packet.guild_id, cacheGuild);
 
-        this.client.emit("autoModerationRuleUpdate", new AutoModerationRule(this.client, packet));
+        this.client.emit("autoModerationRuleUpdate", new AutoModerationRule(this.client, new CacheAutoModerationRule(packet)));
       })(packet);
     });
   }

@@ -1,6 +1,7 @@
 import { type DiscordAPIAutoModerationRule, type FawkesAutoModerationRule, type FawkesGuild } from "@fawkes.js/typings";
 import { type Client } from "../../Client";
 import { AutoModerationRule } from "../../structures/AutoModerationRule";
+import { CacheAutoModerationRule } from "../structures/CacheAutoModerationRule";
 
 export class AUTO_MODERATION_RULE_DELETE {
   client: Client;
@@ -18,7 +19,7 @@ export class AUTO_MODERATION_RULE_DELETE {
         );
         await this.client.cache.set("guild:" + packet.guild_id, cacheGuild);
 
-        this.client.emit("autoModerationRuleDelete", new AutoModerationRule(this.client, packet));
+        this.client.emit("autoModerationRuleDelete", new AutoModerationRule(this.client, new CacheAutoModerationRule(packet)));
       })(packet);
     });
   }

@@ -2,15 +2,16 @@ import { type DiscordAPIGuild, type DiscordAPIGuildMember, type DiscordAPIRole, 
 import { type Client } from "../Client";
 import { Role } from "../structures/Role";
 import { addRole, removeRole } from "../utils/Role";
+import { Guild } from "../structures/Guild";
 
 export class GuildMemberRoleHub {
-  guild: DiscordAPIGuild;
+  guild: Guild;
   member: DiscordAPIGuildMember;
   client!: Client;
   constructor(client: Client, guild: DiscordAPIGuild, member: DiscordAPIGuildMember) {
     Object.defineProperty(this, "client", { value: client });
 
-    this.guild = guild;
+    this.guild = new Guild(client, guild);
 
     this.member = member;
   }
@@ -39,7 +40,10 @@ export class GuildMemberRoleHub {
   }
 
   async add(roleId: string): Promise<Role | null> {
-    const role = this.guild.roles.find((role) => role.id === roleId);
+    const cacheGuild = await this.client.cache.get(`guild:${this.guild.id}`);
+
+    const role = cacheGuild.roles.find((role) => role.id === roleId);
+
     if (role == null) {
       // Throw an error!
       console.log("invalid role id");

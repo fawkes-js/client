@@ -5,6 +5,7 @@ import {
   DiscordAPIApplicationCommandType,
   type DiscordAPIApplicationCommandInteraction,
   type DiscordAPIMessageComponentInteraction,
+  Routes,
 } from "@fawkes.js/typings";
 import { type Client } from "../../Client";
 import { ChatInputCommandInteraction } from "../../structures/interactions/ChatInputCommandInteraction";
@@ -31,11 +32,19 @@ export class INTERACTION_CREATE {
 
         let interaction!: BaseInteraction;
 
-        const guild: DiscordAPIGuild =
+        let guild: DiscordAPIGuild =
           packet.guild_id !== null
             ? await this.client.cache.get("guild:" + <string>packet.guild_id)
             : await getGuild(this.client, <string>packet.guild_id);
-        if (!guild) return; // THROW AN ERROR
+        if (!guild) {
+          console.log("guild not in cache for some reason");
+          await this.client.cache.set(
+            "guild:" + <string>packet.guild_id,
+            await this.client.rest.request(Routes.getGuild(<string>packet.guild_id))
+          );
+          guild = await this.client.cache.get("guild:" + <string>packet.guild_id);
+          guild.channels = await this.client.rest.request(Routes.getGuildChannels(<string>packet.guild_id));
+        } // THROW AN ERROR
 
         const channel = guild.channels.find((channel) => channel.id === packet.channel_id);
         if (!channel) return; // THROW AN ERROR
