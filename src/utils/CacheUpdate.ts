@@ -57,7 +57,7 @@ export const updateCache = async (client: Client, key, newValue): Promise<void> 
   await client.cache.set(key, newData);
 };
 
-export const getCacheGuild = async (client: Client, guildId: Snowflake): Promise<CacheGuild> => {
+export const getCacheGuild = async (client: Client, guildId: Snowflake): Promise<CacheGuild | null> => {
   let cacheGuild: CacheGuild = await client.cache.get(`guild:${guildId}`);
 
   if (!cacheGuild) {
@@ -68,7 +68,7 @@ export const getCacheGuild = async (client: Client, guildId: Snowflake): Promise
   return cacheGuild;
 };
 
-export const getCacheChannel = async (client: Client, guildId: Snowflake, channelId: Snowflake): Promise<CacheChannel> => {
+export const getCacheChannel = async (client: Client, guildId: Snowflake, channelId: Snowflake): Promise<CacheChannel | null> => {
   let cacheChannel: CacheChannel = await client.cache.get(`guild:${guildId}:channel:${channelId}`);
 
   if (!cacheChannel) {
@@ -79,7 +79,7 @@ export const getCacheChannel = async (client: Client, guildId: Snowflake, channe
   return cacheChannel;
 };
 
-export const getCacheGuildMember = async (client: Client, guildId: Snowflake, userId: Snowflake): Promise<CacheGuildMember> => {
+export const getCacheGuildMember = async (client: Client, guildId: Snowflake, userId: Snowflake): Promise<CacheGuildMember | null> => {
   let cacheGuildMember: CacheGuildMember = await client.cache.get(`guild:${guildId}:member:${userId}`);
 
   if (!cacheGuildMember) {

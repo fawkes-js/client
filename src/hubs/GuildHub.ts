@@ -9,9 +9,10 @@ export class GuildHub {
     Object.defineProperty(this, "client", { value: client });
   }
 
-  async fetch(id: string): Promise<Guild> {
-    const guild: CacheGuild = await getCacheGuild(this.client, id);
+  async fetch(id: string): Promise<Guild | null> {
+    const cacheGuild: CacheGuild | null = await getCacheGuild(this.client, id);
+    if (!cacheGuild) return null;
 
-    return new Guild(this.client, guild);
+    return new Guild(this.client, cacheGuild);
   }
 }

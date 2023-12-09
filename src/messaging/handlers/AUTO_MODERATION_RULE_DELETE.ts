@@ -14,7 +14,8 @@ export class AUTO_MODERATION_RULE_DELETE {
   initialize(): void {
     this.client.on("AUTO_MODERATION_RULE_DELETE", (packet: DiscordAPIAutoModerationRule) => {
       void (async (packet: DiscordAPIAutoModerationRule) => {
-        const cacheGuild: CacheGuild = await getCacheGuild(this.client, packet.guild_id);
+        const cacheGuild: CacheGuild | null = await getCacheGuild(this.client, packet.guild_id);
+        if (!cacheGuild) return;
 
         cacheGuild.autoModerationRules.splice(
           cacheGuild.autoModerationRules.findIndex((rule: FawkesAutoModerationRule) => rule.id === packet.id),

@@ -1,4 +1,7 @@
 import { type Client } from "../../Client";
+import { Guild } from "../../structures/Guild";
+import { getCacheGuild } from "../../utils/CacheUpdate";
+import { type CacheGuild } from "../structures/CacheGuild";
 
 export class GUILD_DELETE {
   client: Client;
@@ -9,11 +12,11 @@ export class GUILD_DELETE {
   initialize(): void {
     this.client.on("GUILD_DELETE", (packet) => {
       void (async (packet) => {
-        if ((await this.client.cache.has("guild:" + <string>packet.id)) === true) {
-          await this.client.cache.del("guild:" + <string>packet.id);
-        }
+        const cacheGuild: CacheGuild | null = await getCacheGuild(this.client, packet.id);
 
-        this.client.emit("guildDelete", packet);
+        await this.client.cache.del(`guild:${<string>packet.id}`);
+
+        this.client.emit("guildDelete", cacheGuild ? new Guild(this.client, cacheGuild) : null);
       })(packet);
     });
   }

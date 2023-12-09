@@ -12,6 +12,7 @@ import { type RabbitMQMessageClient } from "../messaging/messaging/RabbitMQMessa
 import { User } from "./User";
 import { type CacheGuild } from "../messaging/structures/CacheGuild";
 import { getCacheChannel, getCacheGuild } from "../utils/CacheUpdate";
+import { type CacheChannel } from "../messaging/structures/CacheChannel";
 
 export class Message {
   id: Snowflake;
@@ -75,9 +76,15 @@ export class Message {
 
       if (collector.limit && collector.collected > collector.limit) await collector.stop("Limit reached.");
 
-      const cacheGuild: CacheGuild = await getCacheGuild(this.client, <string>interaction.guild_id);
+      const cacheGuild: CacheGuild | null = await getCacheGuild(this.client, <string>interaction.guild_id);
+      if (!cacheGuild) return;
 
-      const cacheChannel = await getCacheChannel(this.client, <string>interaction.guild_id, <string>interaction.channel_id);
+      const cacheChannel: CacheChannel | null = await getCacheChannel(
+        this.client,
+        <string>interaction.guild_id,
+        <string>interaction.channel_id
+      );
+      if (!cacheChannel) return;
 
       collector.emit("collect", new MessageComponentInteraction(this.client, interaction, cacheGuild, cacheChannel));
 

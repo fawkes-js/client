@@ -3,6 +3,7 @@ import { type Client } from "../../Client";
 import { AutoModerationActionExecution } from "../../structures/AutoModerationActionExecution";
 import { getAutoModerationRule, getCacheGuild } from "../../utils/CacheUpdate";
 import { CacheAutoModerationRule } from "../structures/CacheAutoModerationRule";
+import { type CacheGuild } from "../structures/CacheGuild";
 
 export class AUTO_MODERATION_ACTION_EXECUTION {
   client: Client;
@@ -13,7 +14,8 @@ export class AUTO_MODERATION_ACTION_EXECUTION {
   initialize(): void {
     this.client.on("AUTO_MODERATION_ACTION_EXECUTION", (packet: DiscordAPIAutoModerationActionExecutionEvent) => {
       void (async (packet) => {
-        const cacheGuild = await getCacheGuild(this.client, packet.guild_id);
+        const cacheGuild: CacheGuild | null = await getCacheGuild(this.client, packet.guild_id);
+        if (!cacheGuild) return;
 
         let rule: CacheAutoModerationRule | undefined;
 

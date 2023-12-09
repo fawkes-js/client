@@ -33,9 +33,15 @@ export class INTERACTION_CREATE {
 
         let interaction!: BaseInteraction;
 
-        const cacheGuild: CacheGuild = await getCacheGuild(this.client, <string>packet.guild_id);
+        const cacheGuild: CacheGuild | null = await getCacheGuild(this.client, <string>packet.guild_id);
+        if (!cacheGuild) return;
 
-        const cacheChannel: CacheChannel = await getCacheChannel(this.client, <string>packet.guild_id, <string>packet.channel_id);
+        const cacheChannel: CacheChannel | null = await getCacheChannel(
+          this.client,
+          <string>packet.guild_id,
+          <string>packet.channel_id
+        );
+        if (!cacheChannel) return;
 
         switch (packet.type) {
           case DiscordAPIInteractionType.ApplicationCommand:

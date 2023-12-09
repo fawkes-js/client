@@ -9,6 +9,7 @@ export class GUILD_MEMBERS_CHUNK {
   initialize(): void {
     this.client.on("GUILD_MEMBER_CHUNK", (packet) => {
       void (async (packet) => {
+        // Need to do
         this.client.emit("guildMemberChunk", "PLACE VARIABLE");
       })(packet);
     });

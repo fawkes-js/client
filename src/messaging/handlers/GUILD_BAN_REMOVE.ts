@@ -13,7 +13,8 @@ export class GUILD_BAN_REMOVE {
   initialize(): void {
     this.client.on("GUILD_BAN_REMOVE", (packet: { guild_id: string; user: DiscordAPIUser }) => {
       void (async (packet) => {
-        const cacheGuild: CacheGuild = await getCacheGuild(this.client, packet.guild_id);
+        const cacheGuild: CacheGuild | null = await getCacheGuild(this.client, packet.guild_id);
+        if (!cacheGuild) return;
 
         cacheGuild.bans.splice(
           cacheGuild.bans.findIndex((id: string) => id === packet.user.id),

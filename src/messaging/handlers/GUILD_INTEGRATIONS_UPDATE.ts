@@ -12,7 +12,10 @@ export class GUILD_INTEGRATIONS_UPDATE {
     this.client.on("GUILD_INTEGRATIONS_UPDATE", (packet) => {
       void (async (packet) => {
         console.log(packet);
-        this.client.emit("guildIntegrationsUpdate", new Guild(this.client, await getCacheGuild(this.client, packet.guild_id)));
+        const cacheGuild = await getCacheGuild(this.client, packet.guild_id);
+        if (!cacheGuild) return;
+
+        this.client.emit("guildIntegrationsUpdate", new Guild(this.client, cacheGuild));
       })(packet);
     });
   }

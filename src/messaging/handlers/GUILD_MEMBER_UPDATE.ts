@@ -1,6 +1,7 @@
 import { type Client } from "../../Client";
 import { GuildMember } from "../../structures/GuildMember";
 import { getCacheGuild } from "../../utils/CacheUpdate";
+import { type CacheGuild } from "../structures/CacheGuild";
 import { CacheGuildMember } from "../structures/CacheGuildMember";
 
 export class GUILD_MEMBER_UPDATE {
@@ -18,10 +19,10 @@ export class GUILD_MEMBER_UPDATE {
           new CacheGuildMember(packet)
         );
 
-        this.client.emit(
-          "guildMemberUpdate",
-          new GuildMember(this.client, await getCacheGuild(this.client, packet.guild_id), new CacheGuildMember(packet))
-        );
+        const cacheGuild: CacheGuild | null = await getCacheGuild(this.client, packet.guild_id);
+        if (!cacheGuild) return;
+
+        this.client.emit("guildMemberUpdate", new GuildMember(this.client, cacheGuild, new CacheGuildMember(packet)));
       })(packet);
     });
   }

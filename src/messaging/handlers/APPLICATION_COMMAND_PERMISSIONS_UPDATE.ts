@@ -2,6 +2,7 @@ import { type DiscordAPIApplicationCommandPermissionsStructure } from "@fawkes.j
 import { type Client } from "../../Client";
 import { ApplicationCommandPermissionsUpdateData } from "../../structures/ApplicationCommandPermissionsUpdateData";
 import { getCacheGuild } from "../../utils/CacheUpdate";
+import { type CacheGuild } from "../structures/CacheGuild";
 
 export class APPLICATION_COMMAND_PERMISSIONS_UPDATE {
   client: Client;
@@ -12,7 +13,8 @@ export class APPLICATION_COMMAND_PERMISSIONS_UPDATE {
   initialize(): void {
     this.client.on("APPLICATION_COMMAND_PERMISSIONS_UPDATE", (packet) => {
       void (async (packet: DiscordAPIApplicationCommandPermissionsStructure) => {
-        const cacheGuild = await getCacheGuild(this.client, packet.guild_id);
+        const cacheGuild: CacheGuild | null = await getCacheGuild(this.client, packet.guild_id);
+        if (!cacheGuild) return;
 
         let app = cacheGuild.applicationCommandPermissions.find((app) => app.id === packet.application_id);
 

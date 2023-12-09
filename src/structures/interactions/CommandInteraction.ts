@@ -47,12 +47,13 @@ function optionsResolver(
           break;
         case DiscordAPICommandOptionType.User:
           // eslint-disable-next-line no-case-declarations
-          const member: CacheGuildMember = await getCacheGuildMember(this.client, guildId, <string>option.value);
+          const cacheGuildMember: CacheGuildMember | null = await getCacheGuildMember(this.client, guildId, <string>option.value);
+          if (!cacheGuildMember) return;
 
-          if (member?.user)
+          if (cacheGuildMember?.user)
             options.push({
               name: option.name,
-              data: new User(client, member.user),
+              data: new User(client, cacheGuildMember.user),
               type: option.type,
             });
           break;
