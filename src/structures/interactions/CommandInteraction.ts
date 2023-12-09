@@ -1,7 +1,5 @@
 import {
   DiscordAPICommandOptionType,
-  type DiscordAPIChannel,
-  type DiscordAPIGuild,
   type DiscordAPIApplicationCommandInteraction,
   type DiscordAPIApplicationCommandInteractionDataOption,
   Routes,
@@ -9,17 +7,22 @@ import {
   RequestMethod,
   type MessageResponseOptions,
   type MessageResponseEditOptions,
+  type Snowflake,
 } from "@fawkes.js/typings";
 import { type Client } from "../../Client";
 import { BaseInteraction } from "./BaseInteraction";
 import { User } from "../User";
 import { APIEmbed } from "../APIEmbed";
 import { Message } from "../Message";
+import { getCacheGuildMember } from "../../utils/CacheUpdate";
+import { type CacheGuildMember } from "../../messaging/structures/CacheGuildMember";
+import { type CacheGuild } from "../../messaging/structures/CacheGuild";
+import { type CacheChannel } from "../../messaging/structures/CacheChannel";
 
 function optionsResolver(
   client: Client,
   interactionOptions: DiscordAPIApplicationCommandInteractionDataOption[],
-  guild: DiscordAPIGuild
+  guildId: Snowflake
 ): any[] {
   const options: any[] = [];
 
@@ -44,7 +47,7 @@ function optionsResolver(
           break;
         case DiscordAPICommandOptionType.User:
           // eslint-disable-next-line no-case-declarations
-          const member = guild.members.find((m) => m.user?.id === option.value);
+          const member: CacheGuildMember = await getCacheGuildMember(this.client, guildId, <string>option.value);
 
           if (member?.user)
             options.push({
@@ -77,12 +80,7 @@ export class CommandInteraction extends BaseInteraction {
   deferred: boolean;
   replied: boolean;
   private _response: undefined | MessageResponseOptions;
-  constructor(
-    client: Client,
-    interaction: DiscordAPIApplicationCommandInteraction,
-    guild: DiscordAPIGuild,
-    channel: DiscordAPIChannel
-  ) {
+  constructor(client: Client, interaction: DiscordAPIApplicationCommandInteraction, guild: CacheGuild, channel: CacheChannel) {
     super(client, interaction, guild, channel);
 
     this.commandId = interaction.data?.id;
@@ -91,7 +89,7 @@ export class CommandInteraction extends BaseInteraction {
 
     this.commandType = interaction.data?.type;
 
-    this.options = interaction.data?.options ? optionsResolver(client, interaction.data.options, guild) : [];
+    this.options = interaction.data?.options ? optionsResolver(client, interaction.data.options, guild.id) : [];
 
     this.deferred = false;
 

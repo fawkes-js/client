@@ -16,7 +16,7 @@ export class CHANNEL_UPDATE {
         // Does not merge any existing properties.
         await this.client.cache.set(`guild:${packet.guild_id}:channel:${packet.id}`, new CacheChannel(packet));
 
-        this.client.emit("channelUpdate", new Channel(this.client, packet));
+        this.client.emit("channelUpdate", new Channel(this.client, new CacheChannel(packet)));
       })(packet);
     });
   }

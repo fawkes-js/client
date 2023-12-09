@@ -2,6 +2,7 @@ import { type DiscordAPIGuildMember } from "@fawkes.js/typings";
 import { type Client } from "../../Client";
 import { CacheGuildMember } from "../structures/CacheGuildMember";
 import { GuildMember } from "../../structures/GuildMember";
+import { getCacheGuild } from "../../utils/CacheUpdate";
 
 export class GUILD_MEMBER_ADD {
   client: Client;
@@ -14,14 +15,11 @@ export class GUILD_MEMBER_ADD {
       void (async (packet) => {
         if (!packet.user) console.log("no packet user");
 
-        await this.client.cache.set(
-          `guild:${<string>packet.guild_id}:members:${<string>packet.user?.id}`,
-          new CacheGuildMember(packet)
-        );
+        await this.client.cache.set(`guild:${packet.guild_id}:members:${<string>packet.user?.id}`, new CacheGuildMember(packet));
 
         this.client.emit(
           "guildMemberAdd",
-          new GuildMember(this.client, await this.client.cache.get(`guild:${<string>packet.guild_id}`), packet)
+          new GuildMember(this.client, await getCacheGuild(this.client, packet.guild_id), new CacheGuildMember(packet))
         );
       })(packet);
     });

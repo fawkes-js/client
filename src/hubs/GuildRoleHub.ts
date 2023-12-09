@@ -1,7 +1,9 @@
-import { type DiscordAPIGuild, type DiscordAPIGuildMember, Routes, type DiscordAPIRole } from "@fawkes.js/typings";
+import { type DiscordAPIGuildMember, Routes, type DiscordAPIRole } from "@fawkes.js/typings";
 import { type Client } from "../Client";
 import { Role } from "../structures/Role";
 import { type Emoji } from "../structures/Emoji";
+import { type CacheGuild } from "../messaging/structures/CacheGuild";
+import { CacheRole } from "../messaging/structures/CacheRole";
 
 export interface RoleOptions {
   name: string;
@@ -14,13 +16,13 @@ export interface RoleOptions {
 }
 
 export class GuildRoleHub {
-  guild: DiscordAPIGuild;
+  guild: CacheGuild;
   member: DiscordAPIGuildMember;
   client!: Client;
-  constructor(client: Client, guild: DiscordAPIGuild) {
+  constructor(client: Client, guild: CacheGuild) {
     Object.defineProperty(this, "client", { value: client });
 
-    this.guild = guild;
+    Object.defineProperty(this, "guild", { value: guild });
   }
 
   async fetch(id?: string): Promise<Role[] | Role | null> {
@@ -33,7 +35,7 @@ export class GuildRoleHub {
     const roles: Role[] = [];
 
     if (!id) {
-      rawRoles.map((rawRole: DiscordAPIRole) => roles.push(new Role(rawRole)));
+      rawRoles.map((rawRole: DiscordAPIRole) => roles.push(new Role(new CacheRole(rawRole))));
       return roles;
     } else {
       const rawRole = rawRoles.find((rawRole: DiscordAPIRole) => rawRole.id === id);

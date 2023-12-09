@@ -1,18 +1,14 @@
-import {
-  Routes,
-  type DiscordAPIGuild,
-  DiscordAPIMessageComponentType,
-  type DiscordAPIChannel,
-  type DiscordAPIMessageComponentInteraction,
-} from "@fawkes.js/typings";
+import { Routes, DiscordAPIMessageComponentType, type DiscordAPIMessageComponentInteraction } from "@fawkes.js/typings";
 import { type Client } from "../../Client";
 import { BaseInteraction } from "./BaseInteraction";
+import { type CacheGuild } from "../../messaging/structures/CacheGuild";
+import { type CacheChannel } from "../../messaging/structures/CacheChannel";
 
 export class MessageComponentInteraction extends BaseInteraction {
   data: any;
   componentType: any;
   componentId: string | undefined;
-  constructor(client: Client, interaction: DiscordAPIMessageComponentInteraction, guild: DiscordAPIGuild, channel: DiscordAPIChannel) {
+  constructor(client: Client, interaction: DiscordAPIMessageComponentInteraction, guild: CacheGuild, channel: CacheChannel) {
     super(client, interaction, guild, channel);
     this.data = interaction.data;
 

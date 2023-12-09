@@ -1,6 +1,7 @@
 import { type DiscordAPIChannel } from "@fawkes.js/typings";
 import { type Client } from "../../Client";
 import { Channel } from "../../structures/Channel";
+import { CacheChannel } from "../structures/CacheChannel";
 
 export class CHANNEL_DELETE {
   client: Client;
@@ -13,7 +14,7 @@ export class CHANNEL_DELETE {
       void (async (packet: DiscordAPIChannel) => {
         await this.client.cache.del(`guild:${packet.guild_id}:channel:${packet.id}`);
 
-        this.client.emit("channelCreate", new Channel(this.client, packet));
+        this.client.emit("channelCreate", new Channel(this.client, new CacheChannel(packet)));
       })(packet);
     });
   }

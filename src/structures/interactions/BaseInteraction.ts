@@ -2,10 +2,8 @@ import {
   type DiscordAPIInteractionType,
   type DiscordAPILocale,
   type DiscordAPIBaseInteraction,
-  type DiscordAPIGuild,
   type DiscordAPIGuildMember,
   type DiscordAPIUser,
-  type DiscordAPIChannel,
 } from "@fawkes.js/typings";
 import { type Client } from "../../Client";
 import { Guild } from "../Guild";
@@ -13,6 +11,9 @@ import { GuildMember } from "../GuildMember";
 import { User } from "../User";
 import { Channel } from "../Channel";
 import { DiscordSnowflake } from "../../utils/Snowflake";
+import { type CacheGuild } from "../../messaging/structures/CacheGuild";
+import { type CacheChannel } from "../../messaging/structures/CacheChannel";
+import { CacheGuildMember } from "../../messaging/structures/CacheGuildMember";
 
 export class BaseInteraction {
   guild: Guild;
@@ -34,8 +35,8 @@ export class BaseInteraction {
   constructor(
     client: Client,
     interaction: DiscordAPIBaseInteraction<DiscordAPIInteractionType, unknown>,
-    guild: DiscordAPIGuild,
-    channel: DiscordAPIChannel
+    guild: CacheGuild,
+    channel: CacheChannel
   ) {
     Object.defineProperty(this, "client", { value: client });
 
@@ -57,7 +58,10 @@ export class BaseInteraction {
 
     this.guild = new Guild(client, guild);
 
-    this.member = interaction.member !== null ? new GuildMember(client, guild, <DiscordAPIGuildMember>interaction.member) : null;
+    this.member =
+      interaction.member !== null
+        ? new GuildMember(client, guild, new CacheGuildMember(<DiscordAPIGuildMember>interaction.member))
+        : null;
 
     this.user = interaction.user ? new User(client, interaction.user) : new User(client, <DiscordAPIUser>interaction?.member?.user);
 

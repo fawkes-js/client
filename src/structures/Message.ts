@@ -1,24 +1,25 @@
 import {
-  type DiscordAPIGuild,
-  type DiscordAPIMessage,
   type Snowflake,
   type DiscordAPIMessageComponentInteraction,
   Routes,
   type MessageResponseOptions,
+  type FawkesMessage,
 } from "@fawkes.js/typings";
 import { type Client } from "../Client";
 import { MessageComponentInteraction } from "./interactions/MessageComponentInteraction";
 import { Collector, type CollectorOptions } from "./Collector";
 import { type RabbitMQMessageClient } from "../messaging/messaging/RabbitMQMessageClient";
 import { User } from "./User";
+import { type CacheGuild } from "../messaging/structures/CacheGuild";
+import { getCacheChannel, getCacheGuild } from "../utils/CacheUpdate";
 
 export class Message {
   id: Snowflake;
   content: string;
   client: Client;
-  message: DiscordAPIMessage;
+  message: FawkesMessage;
   author: User;
-  constructor(client: Client, message: DiscordAPIMessage) {
+  constructor(client: Client, message: FawkesMessage) {
     this.client = client;
 
     this.id = message.id;
@@ -31,7 +32,7 @@ export class Message {
   }
 
   async reply(data: MessageResponseOptions): Promise<void> {
-    await this.client.rest.request(Routes.createMessage(this.message.channel_id), {
+    await this.client.rest.request(Routes.createMessage(this.message.channelId), {
       content: data.content ?? "",
       embeds: data.embeds ?? [],
       components: data.components ?? [],
@@ -74,16 +75,11 @@ export class Message {
 
       if (collector.limit && collector.collected > collector.limit) await collector.stop("Limit reached.");
 
-      const guild: DiscordAPIGuild = await this.client.cache.get(`guild:${<string>interaction.guild_id}`);
-      if (!guild) {
-        console.log("need to throw an error here");
-        return;
-      }
+      const cacheGuild: CacheGuild = await getCacheGuild(this.client, <string>interaction.guild_id);
 
-      const channel = guild.channels.find((channel) => channel.id === interaction.channel_id);
-      if (!channel) return; // THROW AN ERROR
+      const cacheChannel = await getCacheChannel(this.client, <string>interaction.guild_id, <string>interaction.channel_id);
 
-      collector.emit("collect", new MessageComponentInteraction(this.client, interaction, guild, channel));
+      collector.emit("collect", new MessageComponentInteraction(this.client, interaction, cacheGuild, cacheChannel));
 
       if (collector.limit && collector.collected >= collector.limit) await collector.stop("Limit reached.");
     });

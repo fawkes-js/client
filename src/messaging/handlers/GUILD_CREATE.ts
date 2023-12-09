@@ -1,10 +1,17 @@
-import { type DiscordAPIChannel, type DiscordAPIRole, type DiscordAPIGuild, type DiscordAPIEmoji } from "@fawkes.js/typings";
+import {
+  type DiscordAPIChannel,
+  type DiscordAPIRole,
+  type DiscordAPIGuild,
+  type DiscordAPIEmoji,
+  type DiscordAPIGuildMember,
+} from "@fawkes.js/typings";
 import { type Client } from "../../Client";
 import { CacheGuild } from "../structures/CacheGuild";
 import { CacheChannel } from "../structures/CacheChannel";
 import { CacheEmoji } from "../structures/CacheEmoji";
 import { CacheRole } from "../structures/CacheRole";
 import { updateCache } from "../../utils/CacheUpdate";
+import { CacheGuildMember } from "../structures/CacheGuildMember";
 
 export class GUILD_CREATE {
   client: Client;
@@ -36,6 +43,16 @@ export class GUILD_CREATE {
         // Update Cache Emojis
         packet.emojis.map(async (emoji: DiscordAPIEmoji) => {
           await updateCache(this.client, `guild:${packet.id}:emoji:${<string>emoji.id}`, new CacheEmoji(emoji));
+        });
+
+        // Update Cache Members
+
+        packet.members.map(async (member: DiscordAPIGuildMember) => {
+          if (!member.user) {
+            console.log("ERROR");
+            return;
+          }
+          await updateCache(this.client, `guild:${packet.id}:member:${member.user.id}`, new CacheGuildMember(member));
         });
       })(packet);
     });

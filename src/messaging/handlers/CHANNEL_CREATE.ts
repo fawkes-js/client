@@ -15,7 +15,7 @@ export class CHANNEL_CREATE {
       void (async (packet) => {
         await updateCache(this.client, `guild:${packet.guild_id}:channel:${packet.id}`, new CacheChannel(packet));
 
-        this.client.emit("channelCreate", new Channel(this.client, packet));
+        this.client.emit("channelCreate", new Channel(this.client, new CacheChannel(packet)));
       })(packet);
     });
   }

@@ -1,11 +1,12 @@
-import { type MessageResponseOptions, type DiscordAPIChannel, type Snowflake, Routes } from "@fawkes.js/typings";
+import { type MessageResponseOptions, type Snowflake, Routes } from "@fawkes.js/typings";
 import { type Client } from "../Client";
+import { type CacheChannel } from "../messaging/structures/CacheChannel";
 
 export class Channel {
   id: Snowflake;
   name: string | null;
   client: any;
-  constructor(client: Client, channel: DiscordAPIChannel) {
+  constructor(client: Client, channel: CacheChannel) {
     this.id = channel.id;
 
     this.name = channel.name != null ? channel.name : null;
