@@ -10,10 +10,10 @@ export class GUILD_DELETE {
     this.client.on("GUILD_DELETE", (packet) => {
       void (async (packet) => {
         if ((await this.client.cache.has("guild:" + <string>packet.id)) === true) {
-          this.client.emit("guildDelete", packet);
-
           await this.client.cache.del("guild:" + <string>packet.id);
         }
+
+        this.client.emit("guildDelete", packet);
       })(packet);
     });
   }
