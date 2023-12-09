@@ -5,6 +5,7 @@ import {
   type DiscordAPIChannel,
   type DiscordAPIGuildMember,
   type DiscordAPIAutoModerationRule,
+  type Snowflake,
 } from "@fawkes.js/typings";
 import { type Client } from "../Client";
 import { CacheGuild } from "../messaging/structures/CacheGuild";
@@ -47,4 +48,33 @@ export const getAutoModerationRule = async function (
   guild.autoModerationRules.push(fetchedRule);
   await client.cache.set(`guild:${guildId}`, guild);
   return fetchedRule;
+};
+
+export const updateCache = async (client: Client, key, newValue): Promise<void> => {
+  const cacheData: any = await client.cache.get(key);
+  const newData = cacheData ? Object.assign(cacheData, newValue) : newValue;
+
+  await client.cache.set(key, newData);
+};
+
+export const getCacheGuild = async (client: Client, guildId: Snowflake): Promise<CacheGuild> => {
+  let cacheGuild: CacheGuild = await client.cache.get(`guild:${guildId}`);
+
+  if (!cacheGuild) {
+    await getGuild(client, guildId);
+    cacheGuild = await client.cache.get(`guild:${guildId}`);
+  }
+
+  return cacheGuild;
+};
+
+export const getCacheChannel = async (client: Client, guildId: Snowflake, channelId: Snowflake): Promise<CacheChannel> => {
+  let cacheChannel: CacheChannel = await client.cache.get(`guild:${channelId}`);
+
+  if (!cacheChannel) {
+    await getChannel(client, channelId);
+    cacheChannel = await client.cache.get(`guild:${guildId}:channel:${channelId}`);
+  }
+
+  return cacheChannel;
 };

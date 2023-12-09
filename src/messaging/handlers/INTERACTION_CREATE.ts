@@ -25,6 +25,7 @@ export class INTERACTION_CREATE {
 
   initialize(): void {
     this.client.on("INTERACTION_CREATE", (packet) => {
+      console.log("Interaction Create Handler Start", Date.now());
       void (async (packet: DiscordAPIBaseInteraction<DiscordAPIInteractionType, unknown>) => {
         if (this.client.db)
           this.client.db.updateGuildMember(packet.member ? packet.member?.user?.id : packet.user?.id, packet.guild_id);
@@ -74,6 +75,8 @@ export class INTERACTION_CREATE {
           case DiscordAPIInteractionType.Ping:
             break;
         }
+        console.log("Interaction Create Handler End", Date.now());
+
         this.client.emit("interactionCreate", interaction);
       })(packet);
     });

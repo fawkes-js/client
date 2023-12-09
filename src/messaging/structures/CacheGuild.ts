@@ -1,28 +1,21 @@
 import {
-  type DiscordAPIRole,
   type DiscordAPIFeature,
   type DiscordAPIGuild,
   type DiscordAPIGuildVerificationLevel,
   type FawkesAutoModerationRule,
-  type FawkesChannel,
   type FawkesEmoji,
-  type FawkesGuild,
   type FawkesGuildMember,
   type FawkesGuildScheduledEvent,
   type FawkesPresenceUpdate,
-  type FawkesRole,
   type FawkesStageInstance,
   type FawkesSticker,
   type FawkesVoiceState,
   type FawkesWelcomeScreen,
-  type DiscordAPIEmoji,
   type DiscordAPIWelcomeScreen,
   type FawkesWelcomeScreenChannel,
   type DiscordAPIWelcomeScreenChannel,
   type DiscordAPISticker,
   type DiscordAPIVoiceState,
-  type DiscordAPIGuildMember,
-  type DiscordAPIChannel,
   type DiscordAPIPresenceUpdate,
   type FawkesActivity,
   type DiscordAPIActivitySecrets,
@@ -50,14 +43,11 @@ import {
   type Snowflake,
   type FawkesApplicationCommandPermissionStructure,
 } from "@fawkes.js/typings";
-import { CacheRole } from "./CacheRole";
 import { CacheEmoji } from "./CacheEmoji";
 import { CacheSticker } from "./CacheSticker";
-import { CacheGuildMember } from "./CacheGuildMember";
-import { CacheChannel } from "./CacheChannel";
 import { CacheUser } from "./CacheUser";
 
-export class CacheGuild implements FawkesGuild {
+export class CacheGuild {
   constructor(packet: DiscordAPIGuild) {
     this.id = packet.id;
     this.name = packet.name;
@@ -76,12 +66,6 @@ export class CacheGuild implements FawkesGuild {
     this.verificationLevel = packet.verification_level;
     this.defaultMessageNotifications = packet.default_message_notifications;
     this.explicitContentFilter = packet.explicit_content_filter;
-    this.roles = packet.roles.map((role: DiscordAPIRole) => {
-      return new CacheRole(role);
-    });
-    this.emojis = packet.emojis.map((emoji: DiscordAPIEmoji) => {
-      return new CacheEmoji(emoji);
-    });
     this.features = packet.features;
     this.mfaLevel = packet.mfa_level;
     this.applicationId = packet.application_id;
@@ -108,28 +92,30 @@ export class CacheGuild implements FawkesGuild {
         })
       : undefined;
     this.premiumProgressBarEnabled = packet.premium_progress_bar_enabled;
-    this.joinedAt = packet.joined_at;
+    this.joinedAt = packet.joined_at ? packet.joined_at : undefined;
     this.large = packet.large;
     this.unavailable = packet.unavailable ? packet.unavailable : undefined;
-    this.memberCount = packet.member_count;
-    this.voiceStates = packet.voice_states.map((voiceState: DiscordAPIVoiceState) => {
-      return new CacheVoiceState(voiceState);
-    });
-    this.members = packet.members.map((member: DiscordAPIGuildMember) => {
-      return new CacheGuildMember(member);
-    });
-    this.channels = packet.channels.map((channel: DiscordAPIChannel) => {
-      return new CacheChannel(channel);
-    });
-    this.presences = packet.presences.map((presence: DiscordAPIPresenceUpdate) => {
-      return new CachePresenceUpdate(presence);
-    });
-    this.stageInstances = packet.stage_instances.map((stageInstance: DiscordAPIStageInstance) => {
-      return new CacheStageInstance(stageInstance);
-    });
-    this.guildScheduledEvents = packet.guild_scheduled_events.map((guildScheduledEvent: DiscordAPIGuildScheduledEvent) => {
-      return new CacheGuildScheduledEvent(guildScheduledEvent);
-    });
+    this.memberCount = packet.member_count ? packet.member_count : undefined;
+    this.voiceStates = packet.voice_states
+      ? packet.voice_states.map((voiceState: DiscordAPIVoiceState) => {
+          return new CacheVoiceState(voiceState);
+        })
+      : [];
+    this.presences = packet.presences
+      ? packet.presences.map((presence: DiscordAPIPresenceUpdate) => {
+          return new CachePresenceUpdate(presence);
+        })
+      : [];
+    this.stageInstances = packet.stage_instances
+      ? packet.stage_instances.map((stageInstance: DiscordAPIStageInstance) => {
+          return new CacheStageInstance(stageInstance);
+        })
+      : [];
+    this.guildScheduledEvents = packet.guild_scheduled_events
+      ? packet.guild_scheduled_events.map((guildScheduledEvent: DiscordAPIGuildScheduledEvent) => {
+          return new CacheGuildScheduledEvent(guildScheduledEvent);
+        })
+      : [];
     this.autoModerationRules = [];
     this.bans = [];
     this.applicationCommandPermissions = [];
@@ -152,8 +138,6 @@ export class CacheGuild implements FawkesGuild {
   verificationLevel: DiscordAPIGuildVerificationLevel;
   defaultMessageNotifications: number;
   explicitContentFilter: number;
-  roles: FawkesRole[];
-  emojis: FawkesEmoji[];
   features: DiscordAPIFeature[];
   mfaLevel: number;
   applicationId: string | null;
@@ -176,13 +160,11 @@ export class CacheGuild implements FawkesGuild {
   nsfwLevel: number;
   stickers?: FawkesSticker[] | undefined;
   premiumProgressBarEnabled: boolean;
-  joinedAt: Date;
+  joinedAt: Date | undefined;
   large: boolean;
   unavailable?: boolean | undefined;
-  memberCount: number;
+  memberCount: number | undefined;
   voiceStates: FawkesVoiceState[];
-  members: FawkesGuildMember[];
-  channels: FawkesChannel[];
   presences: FawkesPresenceUpdate[];
   stageInstances: FawkesStageInstance[];
   guildScheduledEvents: FawkesGuildScheduledEvent[];

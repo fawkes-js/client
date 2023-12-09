@@ -2,7 +2,8 @@ import { type DiscordAPIChannel } from "@fawkes.js/typings";
 import { type Client } from "../../Client";
 import { Channel } from "../../structures/Channel";
 import { CacheChannel } from "../structures/CacheChannel";
-import { type CacheGuild } from "../structures/CacheGuild";
+// import { CacheChannel } from "../structures/CacheChannel";
+// import { type CacheGuild } from "../structures/CacheGuild";
 export class CHANNEL_UPDATE {
   client: Client;
   constructor(client: Client) {
@@ -12,11 +13,8 @@ export class CHANNEL_UPDATE {
   initialize(): void {
     this.client.on("CHANNEL_UPDATE", (packet: DiscordAPIChannel) => {
       void (async (packet) => {
-        const cacheGuild: CacheGuild = await this.client.cache.get("guild:" + packet.guild_id);
-
-        const cacheChannel = cacheGuild.channels.find((channel: CacheChannel) => channel.id === packet.id);
-
-        const newChannel: CacheChannel = new CacheChannel(packet);
+        // Does not merge any existing properties.
+        await this.client.cache.set(`guild:${packet.guild_id}:channel:${packet.id}`, new CacheChannel(packet));
 
         this.client.emit("channelUpdate", new Channel(this.client, packet));
       })(packet);

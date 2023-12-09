@@ -1,7 +1,7 @@
 import { type DiscordAPIApplicationCommandPermissionsStructure } from "@fawkes.js/typings";
 import { type Client } from "../../Client";
-import { type CacheGuild } from "../structures/CacheGuild";
 import { ApplicationCommandPermissionsUpdateData } from "../../structures/ApplicationCommandPermissionsUpdateData";
+import { getCacheGuild } from "../../utils/CacheUpdate";
 
 export class APPLICATION_COMMAND_PERMISSIONS_UPDATE {
   client: Client;
@@ -12,25 +12,22 @@ export class APPLICATION_COMMAND_PERMISSIONS_UPDATE {
   initialize(): void {
     this.client.on("APPLICATION_COMMAND_PERMISSIONS_UPDATE", (packet) => {
       void (async (packet: DiscordAPIApplicationCommandPermissionsStructure) => {
-        const cachePermissions = {
-          applicationId: packet.application_id,
-          id: packet.id,
-          permissions: packet.permissions,
-        };
+        const cacheGuild = await getCacheGuild(this.client, packet.guild_id);
 
-        const guild: CacheGuild = await this.client.cache.get(`guild:${packet.guild_id}`);
+        let app = cacheGuild.applicationCommandPermissions.find((app) => app.id === packet.application_id);
 
-        const app = guild.applicationCommandPermissions.find((application) => application.applicationId === packet.application_id);
+        if (!app) {
+          cacheGuild.applicationCommandPermissions.push({ id: packet.application_id, permissions: [] });
+          app = cacheGuild.applicationCommandPermissions.find((app) => app.id === packet.application_id);
+          if (!app) {
+            console.log("error!");
+            return;
+          }
+        }
 
-        if (app)
-          guild.applicationCommandPermissions.splice(
-            guild.applicationCommandPermissions.findIndex((application) => application.applicationId === packet.application_id),
-            0,
-            cachePermissions
-          );
-        else guild.applicationCommandPermissions.push(cachePermissions);
+        app.permissions = packet.permissions;
 
-        await this.client.cache.set(`guild:${packet.guild_id}`, guild);
+        await this.client.cache.set(`guild:${packet.guild_id}`, cacheGuild);
 
         this.client.emit("applicationCommandPermissionsUpdate", new ApplicationCommandPermissionsUpdateData(packet));
       })(packet);

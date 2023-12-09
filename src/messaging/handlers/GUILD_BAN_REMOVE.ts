@@ -2,6 +2,7 @@ import { type DiscordAPIUser } from "@fawkes.js/typings";
 import { type Client } from "../../Client";
 import { User } from "../../structures/User";
 import { type CacheGuild } from "../structures/CacheGuild";
+import { getCacheGuild } from "../../utils/CacheUpdate";
 
 export class GUILD_BAN_REMOVE {
   client: Client;
@@ -12,7 +13,7 @@ export class GUILD_BAN_REMOVE {
   initialize(): void {
     this.client.on("GUILD_BAN_REMOVE", (packet: { guild_id: string; user: DiscordAPIUser }) => {
       void (async (packet) => {
-        const cacheGuild: CacheGuild = await this.client.cache.get("guild:" + packet.guild_id);
+        const cacheGuild: CacheGuild = await getCacheGuild(this.client, packet.guild_id);
 
         cacheGuild.bans.splice(
           cacheGuild.bans.findIndex((id: string) => id === packet.user.id),

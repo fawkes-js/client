@@ -1,8 +1,7 @@
 import { type DiscordAPIAutoModerationActionExecutionEvent } from "@fawkes.js/typings";
 import { type Client } from "../../Client";
-import { type CacheGuild } from "../structures/CacheGuild";
 import { AutoModerationActionExecution } from "../../structures/AutoModerationActionExecution";
-import { getAutoModerationRule, getGuild } from "../../utils/CacheUpdate";
+import { getAutoModerationRule, getCacheGuild } from "../../utils/CacheUpdate";
 import { CacheAutoModerationRule } from "../structures/CacheAutoModerationRule";
 
 export class AUTO_MODERATION_ACTION_EXECUTION {
@@ -14,18 +13,19 @@ export class AUTO_MODERATION_ACTION_EXECUTION {
   initialize(): void {
     this.client.on("AUTO_MODERATION_ACTION_EXECUTION", (packet: DiscordAPIAutoModerationActionExecutionEvent) => {
       void (async (packet) => {
-        const guild: CacheGuild =
-          (await this.client.cache.get(`guild:${packet.guild_id}`)) ?? (await getGuild(this.client, packet.guild_id));
-        if (!guild) console.log("THROW AN ERROR");
+        const cacheGuild = await getCacheGuild(this.client, packet.guild_id);
 
         let rule: CacheAutoModerationRule | undefined;
 
-        const cacheRule = guild.autoModerationRules.find((rule) => rule.id === packet.rule_id);
+        const cacheRule = cacheGuild.autoModerationRules.find((rule) => rule.id === packet.rule_id);
 
         if (cacheRule) rule = cacheRule;
         else {
           const cacheRule = await getAutoModerationRule(this.client, packet.guild_id, packet.rule_id);
-          if (!cacheRule) return; // THROW AN ERROR
+          if (!cacheRule) {
+            console.log("ERROR");
+            return;
+          }
           rule = new CacheAutoModerationRule(cacheRule);
         }
 

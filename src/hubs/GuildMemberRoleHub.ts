@@ -6,14 +6,15 @@ import { Guild } from "../structures/Guild";
 
 export class GuildMemberRoleHub {
   guild: Guild;
-  member: DiscordAPIGuildMember;
+  private readonly member: DiscordAPIGuildMember;
   client!: Client;
+
   constructor(client: Client, guild: DiscordAPIGuild, member: DiscordAPIGuildMember) {
     Object.defineProperty(this, "client", { value: client });
 
     this.guild = new Guild(client, guild);
 
-    this.member = member;
+    Object.defineProperty(this, "member", { value: member });
   }
 
   async get(roleId?: string): Promise<Role[] | null> {
