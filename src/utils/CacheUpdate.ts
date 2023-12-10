@@ -6,9 +6,10 @@ import {
   type DiscordAPIGuildMember,
   type DiscordAPIAutoModerationRule,
   type Snowflake,
+  type DiscordAPIGuildScheduledEvent,
 } from "@fawkes.js/typings";
 import { type Client } from "../Client";
-import { CacheGuild } from "../messaging/structures/CacheGuild";
+import { CacheGuild, CacheGuildScheduledEvent } from "../messaging/structures/CacheGuild";
 import { CacheChannel } from "../messaging/structures/CacheChannel";
 import { CacheGuildMember } from "../messaging/structures/CacheGuildMember";
 import { CacheUser } from "../messaging/structures/CacheUser";
@@ -41,13 +42,43 @@ export const getAutoModerationRule = async function (
   client: Client,
   guildId: string,
   ruleId: string
-): Promise<DiscordAPIAutoModerationRule | undefined> {
+): Promise<DiscordAPIAutoModerationRule | null> {
   const fetchedRule = await this.client.rest.request(Routes.getAutoModerationRule(guildId, ruleId));
-  if (!fetchedRule) return; // THROW AN ERROR
-  const guild: CacheGuild = await client.cache.get(`guild:${guildId}`);
-  guild.autoModerationRules.push(fetchedRule);
-  await client.cache.set(`guild:${guildId}`, guild);
+  if (!fetchedRule) {
+    console.log("THROW AN ERROR");
+    return null;
+  }
+  const cacheGuild: CacheGuild | null = await getCacheGuild(client, guildId);
+  if (!cacheGuild) {
+    console.log("THROW AN ERROR");
+    return null;
+  }
+
+  cacheGuild.autoModerationRules.push(fetchedRule);
+  await client.cache.set(`guild:${guildId}`, cacheGuild);
   return fetchedRule;
+};
+
+export const getGuildScheduledEvent = async function (
+  client: Client,
+  guildId: Snowflake,
+  eventId: Snowflake
+): Promise<DiscordAPIGuildScheduledEvent | null> {
+  const fetchedGuildScheduledEvent = await this.client.rest.request(Routes.getGuildScheduledEvent(guildId, eventId));
+  if (!fetchedGuildScheduledEvent) {
+    console.log("THROW AN ERROR!");
+    return null;
+  }
+
+  const cacheGuild: CacheGuild | null = await getCacheGuild(client, guildId);
+  if (!cacheGuild) {
+    console.log("THROW AN ERROR");
+    return null;
+  }
+
+  cacheGuild.guildScheduledEvents.push(new CacheGuildScheduledEvent(fetchedGuildScheduledEvent));
+  await client.cache.set(`guild:${guildId}`, cacheGuild);
+  return fetchedGuildScheduledEvent;
 };
 
 export const updateCache = async (client: Client, key, newValue): Promise<void> => {
@@ -88,4 +119,30 @@ export const getCacheGuildMember = async (client: Client, guildId: Snowflake, us
   }
 
   return cacheGuildMember;
+};
+
+export const getCacheGuildScheduledEvent = async (
+  client: Client,
+  guildId: Snowflake,
+  eventId: Snowflake
+): Promise<CacheGuildScheduledEvent | null> => {
+  const cacheGuild: CacheGuild | null = await getCacheGuild(client, guildId);
+  if (!cacheGuild) return null;
+
+  let cacheGuildScheduledEvent: CacheGuildScheduledEvent | undefined | null = cacheGuild.guildScheduledEvents.find(
+    (event) => event.id === eventId
+  );
+
+  if (!cacheGuildScheduledEvent) {
+    const guildScheduledEvent: DiscordAPIGuildScheduledEvent | null = await getGuildScheduledEvent(client, guildId, eventId);
+
+    if (!guildScheduledEvent) {
+      console.log("THROW AN ERROR");
+      return null;
+    }
+
+    cacheGuildScheduledEvent = new CacheGuildScheduledEvent(guildScheduledEvent);
+  }
+
+  return cacheGuildScheduledEvent;
 };

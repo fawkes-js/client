@@ -195,7 +195,7 @@ export class CacheGuildScheduledEvent implements FawkesGuildScheduledEvent {
     this.status = packet.status;
     this.entityType = packet.entity_type;
     this.entityId = packet.entity_id;
-    this.entityMetadata = new CacheGuildScheduledEventEntityMetadata(packet.entity_metadata);
+    this.entityMetadata = packet.entity_metadata ? new CacheGuildScheduledEventEntityMetadata(packet.entity_metadata) : null;
     this.creator = packet.creator ? new CacheUser(packet.creator) : undefined;
     this.userCount = packet.user_count ? packet.user_count : undefined;
     this.image = packet.image ? packet.image : undefined;
@@ -213,7 +213,7 @@ export class CacheGuildScheduledEvent implements FawkesGuildScheduledEvent {
   status: DiscordAPIGuildScheduledEventStatus;
   entityType: DiscordAPIGuildScheduledEventEntityType;
   entityId: string;
-  entityMetadata: FawkesGuildScheduledEventEntityMetadata;
+  entityMetadata: FawkesGuildScheduledEventEntityMetadata | null;
   creator?: FawkesUser | undefined;
   userCount?: number | undefined;
   image?: string | undefined;

@@ -5,4 +5,5 @@ export * from "./structures/User";
 export * from "./structures/Role";
 export * from "./structures/Message";
 export * from "./structures/ApplicationCommandPermissionsUpdateData";
+export * from "./structures/GuildScheduledEvent";
 export * from "./messaging/handlers/INTERACTION_CREATE";
