@@ -29,14 +29,16 @@ export class GUILD_SCHEDULED_EVENT_DELETE {
           } else console.log("not in cache");
         }
 
+        if (!cacheGuild || !cacheChannel || !cacheGuildMember) return;
+
         this.client.emit(
           "guildScheduledEventDelete",
           new GuildScheduledEvent(
             this.client,
             new CacheGuildScheduledEvent(packet),
-            cacheGuild ? new Guild(this.client, cacheGuild) : null,
-            cacheChannel ? new Channel(this.client, cacheChannel) : null,
-            cacheGuildMember && cacheGuild ? new GuildMember(this.client, cacheGuild, cacheGuildMember) : null
+            new Guild(this.client, cacheGuild),
+            new Channel(this.client, cacheChannel),
+            new GuildMember(this.client, cacheGuild, cacheGuildMember)
           )
         );
       })(packet);

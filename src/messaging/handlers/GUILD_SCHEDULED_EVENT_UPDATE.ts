@@ -30,14 +30,16 @@ export class GUILD_SCHEDULED_EVENT_UPDATE {
           } else console.log("not in cache");
         }
 
+        if (!cacheGuild || !cacheChannel || !cacheGuildMember || !cacheEvent) return;
+
         this.client.emit(
           "guildScheduledEventUpdate",
           new GuildScheduledEvent(
             this.client,
             cacheEvent,
-            cacheGuild ? new Guild(this.client, cacheGuild) : null,
-            cacheChannel ? new Channel(this.client, cacheChannel) : null,
-            cacheGuildMember && cacheGuild ? new GuildMember(this.client, cacheGuild, cacheGuildMember) : null
+            new Guild(this.client, cacheGuild),
+            new Channel(this.client, cacheChannel),
+            new GuildMember(this.client, cacheGuild, cacheGuildMember)
           )
         );
       })(packet);

@@ -21,19 +21,22 @@ export class GUILD_SCHEDULED_EVENT_CREATE {
         const cacheChannel: CacheChannel | null = await getCacheChannel(this.client, packet.guild_id, packet.channel_id);
         const cacheGuildMember: CacheGuildMember | null = await getCacheGuildMember(this.client, packet.guild_id, packet.creator_id);
         const cacheEvent = new CacheGuildScheduledEvent(packet);
+
         if (cacheGuild) {
           cacheGuild.guildScheduledEvents.push(cacheEvent);
           await this.client.cache.set(`guild:${<string>packet.guild_id}`, cacheGuild);
         }
+
+        if (!cacheGuild || !cacheChannel || !cacheGuildMember || !cacheEvent) return;
 
         this.client.emit(
           "guildScheduledEventCreate",
           new GuildScheduledEvent(
             this.client,
             cacheEvent,
-            cacheGuild ? new Guild(this.client, cacheGuild) : null,
-            cacheChannel ? new Channel(this.client, cacheChannel) : null,
-            cacheGuildMember && cacheGuild ? new GuildMember(this.client, cacheGuild, cacheGuildMember) : null
+            new Guild(this.client, cacheGuild),
+            new Channel(this.client, cacheChannel),
+            new GuildMember(this.client, cacheGuild, cacheGuildMember)
           )
         );
       })(packet);

@@ -29,23 +29,18 @@ export class GuildScheduledEvent {
   creatorId: Snowflake | undefined;
   creator: GuildMember | null;
   channelId: Snowflake;
-  constructor(
-    client: Client,
-    guildScheduledEvent: CacheGuildScheduledEvent,
-    guild: Guild | null,
-    channel: Channel | null,
-    creator: GuildMember | null
-  ) {
+  userCount: number | undefined;
+  constructor(client: Client, guildScheduledEvent: CacheGuildScheduledEvent, guild: Guild, channel: Channel, creator: GuildMember) {
     Object.defineProperty(this, "client", { value: client });
 
     // this.autoStart = guildScheduledEvent.
     this.channelId = guildScheduledEvent.channelId;
 
-    this.channel = channel ?? null;
+    this.channel = channel;
 
     this.creatorId = guildScheduledEvent.creatorId;
 
-    this.creator = creator ?? null;
+    this.creator = creator;
 
     this.description = guildScheduledEvent.description;
 
@@ -57,7 +52,7 @@ export class GuildScheduledEvent {
 
     this.guildId = guildScheduledEvent.guildId;
 
-    this.guild = guild ?? null;
+    this.guild = guild;
 
     // this.eventExceptions = guildScheduledEvent
 
@@ -78,5 +73,7 @@ export class GuildScheduledEvent {
     // this.skuIds = guildScheduledEvent.sku
 
     this.status = guildScheduledEvent.status;
+
+    this.userCount = guildScheduledEvent.userCount;
   }
 }
