@@ -4,26 +4,24 @@ import { Guild } from "../../../structures/Guild";
 import { GuildMember } from "../../../structures/GuildMember";
 import { GuildScheduledEvent } from "../../../structures/GuildScheduledEvent";
 import { getCacheChannel, getCacheGuild, getCacheGuildMember, getCacheGuildScheduledEvent } from "../../../utils/CacheUpdate";
-import { type CacheChannel } from "../../structures/CacheChannel";
-import { type CacheGuild, type CacheGuildScheduledEvent } from "../../structures/CacheGuild";
-import { type CacheGuildMember } from "../../structures/CacheGuildMember";
+import { type CacheGuildScheduledEvent } from "../../structures/CacheGuild";
 
 export const guildScheduledEventUserAddRemove = async function (client: Client, packet: any): Promise<void> {
-  const cacheGuild: CacheGuild | null = await getCacheGuild(client, packet.guild_id);
-  const cacheGuildMember: CacheGuildMember | null = await getCacheGuildMember(client, packet.guild_id, packet.user_id);
   const cacheEvent: CacheGuildScheduledEvent | null = await getCacheGuildScheduledEvent(
     client,
     packet.guild_id,
     packet.guild_scheduled_event_id
   );
+  if (!cacheEvent) return;
+  const [cacheGuild, cacheChannel, cacheGuildMember] = await Promise.all([
+    await getCacheGuild(this.client, packet.guild_id),
+    await getCacheChannel(this.client, packet.guild_id, packet.channel_id),
+    await getCacheGuildMember(this.client, packet.guild_id, packet.creator_id),
+  ]);
 
-  if (!cacheGuild || !cacheGuildMember || !cacheEvent) return;
+  if (!cacheGuild || !cacheGuildMember || !cacheChannel) return;
 
   // Need to update the userCount stored in the event in the cache.
-
-  const cacheChannel: CacheChannel | null = await getCacheChannel(client, packet.guild_id, cacheEvent.channelId);
-
-  if (!cacheChannel) return;
 
   // if (cacheGuild) {
   //   cacheGuild.guildScheduledEvents.push(cacheEvent);
