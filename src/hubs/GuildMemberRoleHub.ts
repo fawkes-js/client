@@ -1,18 +1,22 @@
-import { type DiscordAPIGuild, type DiscordAPIGuildMember, type DiscordAPIRole, Routes } from "@fawkes.js/typings";
+import { type DiscordAPIGuildMember, type DiscordAPIRole, Routes } from "@fawkes.js/typings";
 import { type Client } from "../Client";
 import { Role } from "../structures/Role";
 import { addRole, removeRole } from "../utils/Role";
+import { Guild } from "../structures/Guild";
+import { type CacheGuild } from "../messaging/structures/CacheGuild";
+import { type CacheGuildMember } from "../messaging/structures/CacheGuildMember";
 
 export class GuildMemberRoleHub {
-  guild: DiscordAPIGuild;
-  member: DiscordAPIGuildMember;
+  guild: Guild;
+  private readonly member: CacheGuildMember;
   client!: Client;
-  constructor(client: Client, guild: DiscordAPIGuild, member: DiscordAPIGuildMember) {
+
+  constructor(client: Client, guild: CacheGuild, member: CacheGuildMember) {
     Object.defineProperty(this, "client", { value: client });
 
-    this.guild = guild;
+    this.guild = new Guild(client, guild);
 
-    this.member = member;
+    Object.defineProperty(this, "member", { value: member });
   }
 
   async get(roleId?: string): Promise<Role[] | null> {
@@ -39,7 +43,10 @@ export class GuildMemberRoleHub {
   }
 
   async add(roleId: string): Promise<Role | null> {
-    const role = this.guild.roles.find((role) => role.id === roleId);
+    const cacheGuild = await this.client.cache.get(`guild:${this.guild.id}`);
+
+    const role = cacheGuild.roles.find((role) => role.id === roleId);
+
     if (role == null) {
       // Throw an error!
       console.log("invalid role id");

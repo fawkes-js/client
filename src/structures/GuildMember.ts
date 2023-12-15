@@ -1,21 +1,24 @@
-import { type DiscordAPIGuild, type DiscordAPIGuildMember, Routes, type DiscordAPIUser } from "@fawkes.js/typings";
+import { Routes } from "@fawkes.js/typings";
 import { type Client } from "../Client";
 import { GuildMemberRoleHub } from "../hubs/GuildMemberRoleHub";
 import { Guild } from "./Guild";
 import { User } from "./User";
 import { type Role } from "./Role";
+import { type CacheGuild } from "../messaging/structures/CacheGuild";
+import { type CacheGuildMember } from "../messaging/structures/CacheGuildMember";
+import { type CacheUser } from "../messaging/structures/CacheUser";
 
 export class GuildMember {
   client!: Client;
   user: User;
   roles: GuildMemberRoleHub;
   guild: Guild;
-  constructor(client: Client, guild: DiscordAPIGuild, member: DiscordAPIGuildMember) {
+  constructor(client: Client, guild: CacheGuild, member: CacheGuildMember) {
     Object.defineProperty(this, "client", { value: client });
 
     this.guild = new Guild(client, guild);
 
-    this.user = new User(client, <DiscordAPIUser>member.user);
+    this.user = new User(client, <CacheUser>member.user);
 
     this.roles = new GuildMemberRoleHub(client, guild, member);
   }

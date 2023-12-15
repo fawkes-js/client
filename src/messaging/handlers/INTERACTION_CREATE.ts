@@ -1,7 +1,6 @@
 import {
   type DiscordAPIBaseInteraction,
   DiscordAPIInteractionType,
-  type DiscordAPIGuild,
   DiscordAPIApplicationCommandType,
   type DiscordAPIApplicationCommandInteraction,
   type DiscordAPIMessageComponentInteraction,
@@ -12,6 +11,9 @@ import { MessageComponentInteraction } from "../../structures/interactions/Messa
 import { UserCommandInteraction } from "../../structures/interactions/UserCommandInteraction";
 import { MessageCommandInteraction } from "../../structures/interactions/MessageCommandInteraction";
 import { type BaseInteraction } from "../../structures/interactions/BaseInteraction";
+import { getCacheChannel, getCacheGuild } from "../../utils/CacheUpdate";
+import { type CacheGuild } from "../structures/CacheGuild";
+import { type CacheChannel } from "../structures/CacheChannel";
 
 export type Interaction = ChatInputCommandInteraction | MessageComponentInteraction;
 
@@ -23,6 +25,7 @@ export class INTERACTION_CREATE {
 
   initialize(): void {
     this.client.on("INTERACTION_CREATE", (packet) => {
+      console.log("Interaction Create Handler Start", Date.now());
       void (async (packet: DiscordAPIBaseInteraction<DiscordAPIInteractionType, unknown>) => {
         if (this.client.db)
           this.client.db.updateGuildMember(packet.member ? packet.member?.user?.id : packet.user?.id, packet.guild_id);
@@ -30,12 +33,15 @@ export class INTERACTION_CREATE {
 
         let interaction!: BaseInteraction;
 
-        const guild: DiscordAPIGuild =
-          packet.guild_id !== null ? await this.client.cache.get("guild:" + <string>packet.guild_id) : null;
+        const cacheGuild: CacheGuild | null = await getCacheGuild(this.client, <string>packet.guild_id);
+        if (!cacheGuild) return;
 
-        const channel = guild.channels.find((channel) => channel.id === packet.channel_id);
-
-        if (!channel) return; // THROW AN ERROR
+        const cacheChannel: CacheChannel | null = await getCacheChannel(
+          this.client,
+          <string>packet.guild_id,
+          <string>packet.channel_id
+        );
+        if (!cacheChannel) return;
 
         switch (packet.type) {
           case DiscordAPIInteractionType.ApplicationCommand:
@@ -43,16 +49,16 @@ export class INTERACTION_CREATE {
             const commandPacket = <DiscordAPIApplicationCommandInteraction>packet;
 
             if (commandPacket.data?.type === DiscordAPIApplicationCommandType.ChatInput)
-              interaction = new ChatInputCommandInteraction(this.client, commandPacket, guild, channel);
+              interaction = new ChatInputCommandInteraction(this.client, commandPacket, cacheGuild, cacheChannel);
             else if (commandPacket.data?.type === DiscordAPIApplicationCommandType.Message) {
-              interaction = new MessageCommandInteraction(this.client, commandPacket, guild, channel);
+              interaction = new MessageCommandInteraction(this.client, commandPacket, cacheGuild, cacheChannel);
             } else if (commandPacket.data?.type === DiscordAPIApplicationCommandType.User)
-              interaction = new UserCommandInteraction(this.client, commandPacket, guild, channel);
+              interaction = new UserCommandInteraction(this.client, commandPacket, cacheGuild, cacheChannel);
             break;
           case DiscordAPIInteractionType.MessageComponent:
             // eslint-disable-next-line no-case-declarations
             const componentPacket = <DiscordAPIMessageComponentInteraction>packet;
-            interaction = new MessageComponentInteraction(this.client, componentPacket, guild, channel);
+            interaction = new MessageComponentInteraction(this.client, componentPacket, cacheGuild, cacheChannel);
             break;
           case DiscordAPIInteractionType.ApplicationCommandAutocomplete:
             break;
@@ -62,6 +68,8 @@ export class INTERACTION_CREATE {
           case DiscordAPIInteractionType.Ping:
             break;
         }
+        console.log("Interaction Create Handler End", Date.now());
+
         this.client.emit("interactionCreate", interaction);
       })(packet);
     });

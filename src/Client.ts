@@ -63,7 +63,6 @@ export class Client extends EventEmitter {
 
     if (this.gateway) {
       this.gateway.login();
-      this.gateway.on(Events.Debug, console.log);
     }
     await this.messager.connect();
 

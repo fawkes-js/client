@@ -1,12 +1,10 @@
 import { type Client } from "../Client";
+import { AutoModerationRule } from "./AutoModerationRule";
 import { type CacheAutoModerationRule } from "../messaging/structures/CacheAutoModerationRule";
 
-export class AutoModerationRule {
-  id: string;
-  client: Client;
+export class AutoModerationActionExecution {
+  rule: AutoModerationRule;
   constructor(client: Client, rule: CacheAutoModerationRule) {
-    Object.defineProperty(this, "client", { value: client });
-
-    this.id = rule.id;
+    this.rule = new AutoModerationRule(client, rule);
   }
 }

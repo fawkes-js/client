@@ -1,97 +1,28 @@
 import {
   DiscordAPICommandOptionType,
-  type DiscordAPIChannel,
-  type DiscordAPIGuild,
   type DiscordAPIApplicationCommandInteraction,
   type DiscordAPIApplicationCommandInteractionDataOption,
-  type DiscordAPIMessageComponentType,
-  type DiscordAPIButtonComponentButtonStyleType,
-  type DiscordAPIEmoji,
   Routes,
   DiscordAPIInteractionCallbackType,
   RequestMethod,
+  type MessageResponseOptions,
+  type MessageResponseEditOptions,
+  type Snowflake,
 } from "@fawkes.js/typings";
 import { type Client } from "../../Client";
 import { BaseInteraction } from "./BaseInteraction";
 import { User } from "../User";
-import { APIEmbed, type Embed } from "../APIEmbed";
+import { APIEmbed } from "../APIEmbed";
 import { Message } from "../Message";
+import { getCacheGuildMember } from "../../utils/CacheUpdate";
+import { type CacheGuildMember } from "../../messaging/structures/CacheGuildMember";
+import { type CacheGuild } from "../../messaging/structures/CacheGuild";
+import { type CacheChannel } from "../../messaging/structures/CacheChannel";
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface Attachment {}
-
-interface ButtonComponent {
-  type: 2;
-  style: DiscordAPIButtonComponentButtonStyleType;
-  label?: string;
-  emoji?: DiscordAPIEmoji;
-  custom_id?: string;
-  url?: string;
-  disabled?: boolean;
-}
-
-interface StringSelectComponentOption {
-  label: string;
-  value: string;
-  description?: string;
-  emoji?: any;
-}
-interface StringSelectComponent {
-  type: DiscordAPIMessageComponentType.StringSelect;
-  custom_id: string;
-  disabled?: boolean;
-  options: StringSelectComponentOption[];
-}
-
-interface TextInputComponent {
-  type: DiscordAPIMessageComponentType.TextInput;
-}
-
-interface UserSelectComponent {
-  type: DiscordAPIMessageComponentType.UserSelect;
-}
-
-interface RoleSelectComponent {
-  type: DiscordAPIMessageComponentType.RoleSelect;
-}
-
-interface MentionableSelectComponent {
-  type: DiscordAPIMessageComponentType.MentionableSelect;
-}
-
-interface ChannelSelectComponent {
-  type: DiscordAPIMessageComponentType.ChannelSelect;
-}
-
-export interface ActionRowComponent {
-  type: DiscordAPIMessageComponentType.ActionRow;
-  components: Array<
-    | ButtonComponent
-    | StringSelectComponent
-    | TextInputComponent
-    | UserSelectComponent
-    | RoleSelectComponent
-    | MentionableSelectComponent
-    | ChannelSelectComponent
-  >;
-}
-
-interface InteractionResponseOptions {
-  content?: string;
-  embeds?: Embed[];
-  attachments?: Attachment[];
-  fetchReply?: boolean;
-  components?: ActionRowComponent[];
-  ephemeral?: boolean;
-}
-
-export interface InteractionResponseEditOptions {
-  maintainDefaults: true;
-}
 function optionsResolver(
   client: Client,
   interactionOptions: DiscordAPIApplicationCommandInteractionDataOption[],
-  guild: DiscordAPIGuild
+  guildId: Snowflake
 ): any[] {
   const options: any[] = [];
 
@@ -116,12 +47,13 @@ function optionsResolver(
           break;
         case DiscordAPICommandOptionType.User:
           // eslint-disable-next-line no-case-declarations
-          const member = guild.members.find((m) => m.user?.id === option.value);
+          const cacheGuildMember: CacheGuildMember | null = await getCacheGuildMember(this.client, guildId, <string>option.value);
+          if (!cacheGuildMember) return;
 
-          if (member?.user)
+          if (cacheGuildMember?.user)
             options.push({
               name: option.name,
-              data: new User(client, member.user),
+              data: new User(client, cacheGuildMember.user),
               type: option.type,
             });
           break;
@@ -148,13 +80,8 @@ export class CommandInteraction extends BaseInteraction {
   options: any[] | [];
   deferred: boolean;
   replied: boolean;
-  private _response: undefined | InteractionResponseOptions;
-  constructor(
-    client: Client,
-    interaction: DiscordAPIApplicationCommandInteraction,
-    guild: DiscordAPIGuild,
-    channel: DiscordAPIChannel
-  ) {
+  private _response: undefined | MessageResponseOptions;
+  constructor(client: Client, interaction: DiscordAPIApplicationCommandInteraction, guild: CacheGuild, channel: CacheChannel) {
     super(client, interaction, guild, channel);
 
     this.commandId = interaction.data?.id;
@@ -163,7 +90,7 @@ export class CommandInteraction extends BaseInteraction {
 
     this.commandType = interaction.data?.type;
 
-    this.options = interaction.data?.options ? optionsResolver(client, interaction.data.options, guild) : [];
+    this.options = interaction.data?.options ? optionsResolver(client, interaction.data.options, guild.id) : [];
 
     this.deferred = false;
 
@@ -172,7 +99,7 @@ export class CommandInteraction extends BaseInteraction {
     this._response = undefined;
   }
 
-  async reply<T extends InteractionResponseOptions>(data: T): Promise<T["fetchReply"] extends true ? Message : null> {
+  async reply<T extends MessageResponseOptions>(data: T): Promise<T["fetchReply"] extends true ? Message : null> {
     if (this.replied || this.deferred)
       console.log("need to throw an error here... but this has already been replied too or deferred!");
 
@@ -225,7 +152,7 @@ export class CommandInteraction extends BaseInteraction {
     return new Message(this.client, reply);
   }
 
-  async editReply(data: InteractionResponseOptions, options?: InteractionResponseEditOptions): Promise<any> {
+  async editReply(data: MessageResponseOptions, options?: MessageResponseEditOptions): Promise<any> {
     const reply = await this.client.rest.request(
       Routes.webhookMessage(this.applicationId, this.token, "@original", RequestMethod.Patch),
       data

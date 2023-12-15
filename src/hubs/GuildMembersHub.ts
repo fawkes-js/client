@@ -1,19 +1,20 @@
-import { type DiscordAPIGuild, type DiscordAPIGuildMember, type Snowflake } from "@fawkes.js/typings";
+import { type Snowflake } from "@fawkes.js/typings";
 import { type Client } from "../Client";
 import { GuildMember } from "../structures/GuildMember";
+import { type CacheGuild } from "../messaging/structures/CacheGuild";
+import { getCacheGuildMember } from "../utils/CacheUpdate";
 
 export class GuildMembersHub {
   client!: Client;
-  guild: DiscordAPIGuild;
-  constructor(client: Client, guild: DiscordAPIGuild) {
+  guild: CacheGuild;
+  constructor(client: Client, guild: CacheGuild) {
     Object.defineProperty(this, "client", { value: client });
 
-    this.guild = guild;
+    Object.defineProperty(this, "guild", { value: guild });
   }
 
   async fetch(id: Snowflake): Promise<GuildMember | null> {
-    const cachedGuild = await this.client.cache.get("guild:" + this.guild.id);
-    const member = cachedGuild.members.find((member: DiscordAPIGuildMember) => member.user?.id === id);
+    const member = await getCacheGuildMember(this.client, this.guild.id, id);
     if (member !== null) return new GuildMember(this.client, this.guild, member);
     else return null;
   }

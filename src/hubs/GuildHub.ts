@@ -1,6 +1,7 @@
-import { type DiscordAPIGuild } from "@fawkes.js/typings";
 import { type Client } from "../Client";
 import { Guild } from "../structures/Guild";
+import { type CacheGuild } from "../messaging/structures/CacheGuild";
+import { getCacheGuild } from "../utils/CacheUpdate";
 
 export class GuildHub {
   client!: Client;
@@ -8,9 +9,10 @@ export class GuildHub {
     Object.defineProperty(this, "client", { value: client });
   }
 
-  async fetch(id: string): Promise<Guild> {
-    const guild: DiscordAPIGuild = await this.client.cache.get("guild:" + id);
+  async fetch(id: string): Promise<Guild | null> {
+    const cacheGuild: CacheGuild | null = await getCacheGuild(this.client, id);
+    if (!cacheGuild) return null;
 
-    return new Guild(this.client, guild);
+    return new Guild(this.client, cacheGuild);
   }
 }

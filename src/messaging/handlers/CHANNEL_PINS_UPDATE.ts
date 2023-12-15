@@ -1,6 +1,7 @@
-import { type DiscordAPIChannel } from "@fawkes.js/typings";
 import { type Client } from "../../Client";
 import { Channel } from "../../structures/Channel";
+import { getCacheChannel } from "../../utils/CacheUpdate";
+import { type CacheChannel } from "../structures/CacheChannel";
 
 export class CHANNEL_PINS_UPDATE {
   client: Client;
@@ -11,20 +12,12 @@ export class CHANNEL_PINS_UPDATE {
   initialize(): void {
     this.client.on("CHANNEL_PINS_UPDATE", (packet) => {
       void (async (packet) => {
-        const cacheGuild = await this.client.cache.get("guild:" + <string>packet.guild_id);
+        const cacheChannel: CacheChannel | null = await getCacheChannel(this.client, packet.guild_id, packet.channel_id);
+        if (!cacheChannel) return;
 
-        const cacheChannel = cacheGuild.channels.find((channel: DiscordAPIChannel) => channel.id === packet.channel_id);
+        cacheChannel.lastPinTimestamp = packet.last_pin_timestamp;
 
-        if (!cacheChannel) console.log("ERROR");
-        else {
-          cacheChannel.last_pin_timestamp = packet.last_pin_timestamp;
-
-          cacheGuild.channels.splice(
-            cacheGuild.channels.findIndex((channel) => channel.id === packet.id),
-            1,
-            cacheChannel
-          );
-        }
+        await this.client.cache.set(`guild:${<string>packet.guild_id}:channel:${<string>packet.channel_id}`, cacheChannel);
 
         this.client.emit("channelsPinsUpdate", new Channel(this.client, packet));
       })(packet);

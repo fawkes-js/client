@@ -1,4 +1,6 @@
 import { type Client } from "../../Client";
+import { Role } from "../../structures/Role";
+import { CacheRole } from "../structures/CacheRole";
 
 export class GUILD_ROLE_UPDATE {
   client: Client;
@@ -9,7 +11,9 @@ export class GUILD_ROLE_UPDATE {
   initialize(): void {
     this.client.on("GUILD_ROLE_UPDATE", (packet) => {
       void (async (packet) => {
-        this.client.emit("guildRoleUpdate", "PLACE VARIABLE");
+        await this.client.cache.set(`guild:${<string>packet.guild_id}:role:${<string>packet.role.id}`, new CacheRole(packet));
+
+        this.client.emit("guildRoleUpdate", new Role(new CacheRole(packet)));
       })(packet);
     });
   }

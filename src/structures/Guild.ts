@@ -1,9 +1,9 @@
-import { type DiscordAPIGuild, type DiscordAPIGuildMember } from "@fawkes.js/typings";
 import { type Client } from "../Client";
 import { ChannelHub } from "../hubs/ChannelHub";
 import { GuildMembersHub } from "../hubs/GuildMembersHub";
 import { GuildRoleHub } from "../hubs/GuildRoleHub";
-import { User } from "./User";
+import { type User } from "./User";
+import { type CacheGuild } from "../messaging/structures/CacheGuild";
 
 export class Guild {
   channels: ChannelHub;
@@ -16,9 +16,7 @@ export class Guild {
   owner: User | null;
   afkTimeout: number;
   verificationLevel: number;
-  constructor(client: Client, guild: DiscordAPIGuild) {
-    const user = guild.members.find((m: DiscordAPIGuildMember) => m.user?.id === guild.owner_id)?.user;
-
+  constructor(client: Client, guild: CacheGuild) {
     Object.defineProperty(this, "client", { value: client });
 
     this.id = guild.id;
@@ -27,11 +25,9 @@ export class Guild {
 
     this.description = guild.description;
 
-    this.owner = user != null ? new User(client, user) : null;
+    this.afkTimeout = guild.afkTimeout;
 
-    this.afkTimeout = guild.afk_timeout;
-
-    this.verificationLevel = guild.verification_level;
+    this.verificationLevel = guild.verificationLevel;
 
     this.channels = new ChannelHub(this.client, this);
 

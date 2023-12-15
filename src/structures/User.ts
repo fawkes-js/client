@@ -1,5 +1,5 @@
-import { type DiscordAPIUser } from "@fawkes.js/typings";
 import { type Client } from "../Client";
+import { type CacheUser } from "../messaging/structures/CacheUser";
 
 export class User {
   client: Client;
@@ -7,7 +7,7 @@ export class User {
   username: string;
   discriminator: string;
   iconHash: string | null;
-  constructor(client: Client, user: DiscordAPIUser) {
+  constructor(client: Client, user: CacheUser) {
     Object.defineProperty(this, "client", { value: client });
 
     this.id = user.id;

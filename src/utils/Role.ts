@@ -2,7 +2,7 @@ import { type DiscordAPIGuild, type DiscordAPIGuildMember, type DiscordAPIRole, 
 import { type Client } from "../Client";
 
 async function getMember(client: Client, guildId: Snowflake, userId: Snowflake): Promise<any> {
-  const guild: DiscordAPIGuild = await client.cache.get(guildId);
+  const guild: DiscordAPIGuild = await client.cache.get(`guild:${guildId}`);
 
   const member = guild.members.find((member: DiscordAPIGuildMember) => member.user?.id === userId);
 
