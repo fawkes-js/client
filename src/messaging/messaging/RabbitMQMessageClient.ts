@@ -17,6 +17,7 @@ export class RabbitMQMessageClient {
   async connect(): Promise<void> {
     // Create a connection with the AMQP Server,
     connect(this.options.hostname, (err, connection) => {
+      console.log(err, connection);
       if (err !== null) {
         console.log("AMQP Error - Error Connecting,");
         return;
@@ -37,7 +38,6 @@ export class RabbitMQMessageClient {
           "primary",
           (message) => {
             const packet = JSON.parse(message.content.toString());
-
             this.client.emit(packet.t, packet.d);
           },
           { noAck: true }
@@ -54,7 +54,6 @@ export class RabbitMQMessageClient {
           }
           this.queue = q;
           this.channel.bindQueue(q.queue, "return", "");
-
           this.channel.consume(
             q.queue,
             (message) => {

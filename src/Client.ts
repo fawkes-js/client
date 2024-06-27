@@ -49,7 +49,7 @@ export class Client extends EventEmitter {
       cache: false,
       subscriber: false,
     };
-    this.messager = this.options.gateway ? new LocalMessageClient(this) : new RabbitMQMessageClient(this);
+    this.messager = this.options.rabbit ? new RabbitMQMessageClient(this) : new LocalMessageClient(this);
 
     this.gateway = this.options.gateway ?? null;
 
@@ -64,6 +64,7 @@ export class Client extends EventEmitter {
     if (this.gateway) {
       this.gateway.login();
     }
+
     await this.messager.connect();
 
     this.application = <Application>await this.cache.get("application");

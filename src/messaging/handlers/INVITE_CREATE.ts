@@ -24,7 +24,7 @@ export class INVITE_CREATE {
   }
 
   initialize(): void {
-    this.client.on("INVITE_CREATE", (packet: GatewayInvite) => {
+    this.client.on("INVITE_CREATE", (packet: any) => {
       void (async (packet) => {
         const [cacheGuild, cacheChannel, cacheInviter] = await Promise.all([
           await getCacheGuild(this.client, <Snowflake>packet.guild_id),
@@ -32,11 +32,15 @@ export class INVITE_CREATE {
           await getCacheGuildMember(this.client, <Snowflake>packet.guild_id, <Snowflake>packet.inviter?.id),
         ]);
 
+        const cacheInvite = new CacheInvite(packet);
+
+        await this.client.cache.set(`guild:${<string>packet.guild_id}:invite:${<string>packet.code}`, cacheInvite);
+
         if (!cacheGuild || !cacheChannel || !cacheInviter || !cacheInviter.user) return;
         this.client.emit(
           "inviteCreate",
           new Invite(
-            new CacheInvite(packet),
+            cacheInvite,
             new Guild(this.client, cacheGuild),
             new Channel(this.client, cacheChannel),
             new User(this.client, cacheInviter.user)
