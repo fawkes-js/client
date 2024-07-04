@@ -7,12 +7,14 @@ import {
   type DiscordAPIAutoModerationRule,
   type Snowflake,
   type DiscordAPIGuildScheduledEvent,
+  type DiscordAPIInvite,
 } from "@fawkes.js/typings";
 import { type Client } from "../Client";
 import { CacheGuild, CacheGuildScheduledEvent } from "../messaging/structures/CacheGuild";
 import { CacheChannel } from "../messaging/structures/CacheChannel";
 import { CacheGuildMember } from "../messaging/structures/CacheGuildMember";
 import { CacheUser } from "../messaging/structures/CacheUser";
+import { CacheInvite } from "../messaging/structures/CacheInvite";
 
 export const getGuild = async function (client: Client, guildId: string): Promise<DiscordAPIGuild> {
   const guild = await client.rest.request(Routes.getGuild(guildId));
@@ -36,6 +38,18 @@ export const getGuildMember = async function (client: Client, guildId: string, u
   const member = await client.rest.request(Routes.getGuildMember(guildId, userId));
   await client.cache.set(`guild:${guildId}:members:${userId}`, new CacheGuildMember(member));
   return member;
+};
+
+export const getInvite = async function (client: Client, guildId: string, code: string): Promise<DiscordAPIInvite | null> {
+  let invite;
+  try {
+    invite = await client.rest.request(Routes.getInvite(code));
+  } catch (err) {
+    console.log("GET Invite error");
+    return null;
+  }
+  await client.cache.set(`guild:${guildId}:invite:${code}`, new CacheInvite(invite));
+  return invite;
 };
 
 export const getAutoModerationRule = async function (
@@ -145,4 +159,15 @@ export const getCacheGuildScheduledEvent = async (
   }
 
   return cacheGuildScheduledEvent;
+};
+
+export const getCacheInvite = async (client: Client, guildId: Snowflake, code: string): Promise<CacheInvite | null> => {
+  let cacheInvite: CacheInvite = await client.cache.get(`guild:${guildId}:invite:${code}`);
+
+  if (!cacheInvite) {
+    await getInvite(client, guildId, code);
+    cacheInvite = await client.cache.get(`guild:${guildId}:invite:${code}`);
+  }
+
+  return cacheInvite;
 };

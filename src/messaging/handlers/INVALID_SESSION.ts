@@ -9,7 +9,8 @@ export class INVALID_SESSION {
   initialize(): void {
     this.client.on("INVALID_SESSION", (packet) => {
       void (async (packet) => {
-        this.client.emit("invalidSession", "PLACE VARIABLE");
+        // Not in use
+        this.client.emit("invalidSession", "Invalid Session");
       })(packet);
     });
   }
